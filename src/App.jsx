@@ -21,15 +21,19 @@ const TrashIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
 );
 
-// ================= DATA =================
-// ইম্পোর্ট এরর এড়াতে ছবিগুলোর নাম সরাসরি দেওয়া হলো
+const UserPlaceholderIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-400"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+);
+
+// ================= DATA WITH PUBLIC IMAGES =================
+// Vite-এ public ফোল্ডার বা রুট ফোল্ডার থেকে সরাসরি লিংক করা হলো
 const MEMBERS = [
-  { id: 'm1', name: "শায়েখ সাহাব উদ্দিন", phone: "16892532453" },
-  { id: 'm2', name: "হাফেজ মহসিন", phone: "15165858019" },
-  { id: 'm3', name: "মাওলানা রায়হান", phone: "19294939307" },
-  { id: 'm4', name: "মাওলানা আবদুল সাত্তার", phone: "19294754697" },
-  { id: 'm5', name: "আলহাজ্ব বাপ্পি মোল্লা", phone: "12137609654" },
-  { id: 'm6', name: "মাওলানা ইমরান", phone: "13479571836" }
+  { id: 'm1', name: "শায়েখ সাহাব উদ্দিন", img: "/সাহাব উদ্দিন.jpeg", phone: "16892532453" },
+  { id: 'm2', name: "হাফেজ মহসিন", img: "/মহসিন.jpeg", phone: "15165858019" },
+  { id: 'm3', name: "মাওলানা রায়হান", img: "/রায়হান মির্জা.jpeg", phone: "19294939307" },
+  { id: 'm4', name: "মাওলানা আবদুল সাত্তার", img: "/আবদুল সাত্তার.jpeg", phone: "19294754697" },
+  { id: 'm5', name: "আলহাজ্ব বাপ্পি মোল্লা", img: "/বাদশা.jpeg", phone: "12137609654" },
+  { id: 'm6', name: "মাওলানা ইমরান", img: "/ইমরান ভুঁইয়া.png", phone: "13479571836" }
 ];
 
 const memberNamesOnly = MEMBERS.map(m => m.name);
@@ -102,6 +106,26 @@ export default function App() {
   const totalExpense = marketItems.reduce((sum, item) => sum + item.amount, 0);
   const perPersonCost = MEMBERS.length > 0 ? totalExpense / MEMBERS.length : 0;
 
+  // ================= IMAGE FALLBACK COMPONENT =================
+  const MemberAvatar = ({ src, alt, sizeClass = "w-12 h-12" }) => {
+    const [imgError, setImgError] = useState(false);
+    
+    return (
+      <div className={`${sizeClass} rounded-full overflow-hidden border-2 border-white shadow-sm flex items-center justify-center bg-slate-100 shrink-0`}>
+        {!imgError ? (
+          <img 
+            src={src} 
+            alt={alt} 
+            className="w-full h-full object-cover" 
+            onError={() => setImgError(true)} 
+          />
+        ) : (
+          <UserPlaceholderIcon />
+        )}
+      </div>
+    );
+  };
+
   // ================= RENDER HOME =================
   const renderHome = () => (
     <div className="flex flex-col h-full bg-[#f4f1f8]">
@@ -109,7 +133,7 @@ export default function App() {
       {/* Top Header */}
       <div className="bg-[#1e3a8a] text-center py-5 shadow-md z-10">
         <h1 className="text-yellow-400 text-3xl font-black mb-1 tracking-wider">লিল্লাহি এতিমখানা</h1>
-        <h2 className="text-white text-xl font-bold">দার আইতাম লিলাহ</h2>
+        <h2 className="text-white text-xl font-bold">دار أيتام ليلاه</h2>
       </div>
 
       {/* Main Content Area */}
@@ -148,13 +172,15 @@ export default function App() {
 
         {/* Current Duties */}
         <div className="grid grid-cols-2 gap-4 mb-6">
-          <div className="bg-white rounded-xl py-3 px-2 text-center shadow-sm border border-red-100">
-            <p className="text-red-500 font-semibold text-sm mb-0.5">নোয়াখাইল্লা শেফ</p>
-            <p className="text-red-600 font-bold text-sm">{memberNamesOnly[getCookIndex(today)]}</p>
+          <div className="bg-white rounded-xl py-3 px-2 text-center shadow-sm border border-red-100 flex flex-col items-center">
+            <MemberAvatar src={MEMBERS[getCookIndex(today)]?.img} alt="Cook" sizeClass="w-10 h-10 mb-2" />
+            <p className="text-red-500 font-semibold text-[11px] mb-0.5 uppercase tracking-wide">আজকের শেফ</p>
+            <p className="text-red-700 font-bold text-sm leading-tight">{memberNamesOnly[getCookIndex(today)]}</p>
           </div>
-          <div className="bg-white rounded-xl py-3 px-2 text-center shadow-sm border border-pink-100">
-            <p className="text-pink-400 font-semibold text-sm mb-0.5">প্রফেশনাল ক্লিনার</p>
-            <p className="text-pink-500 font-bold text-sm">{memberNamesOnly[getCleanerIndex(today)]}</p>
+          <div className="bg-white rounded-xl py-3 px-2 text-center shadow-sm border border-pink-100 flex flex-col items-center">
+            <MemberAvatar src={MEMBERS[getCleanerIndex(today)]?.img} alt="Cleaner" sizeClass="w-10 h-10 mb-2" />
+            <p className="text-pink-400 font-semibold text-[11px] mb-0.5 uppercase tracking-wide">আজকের ক্লিনার</p>
+            <p className="text-pink-600 font-bold text-sm leading-tight">{memberNamesOnly[getCleanerIndex(today)]}</p>
           </div>
         </div>
       </div>
@@ -163,12 +189,12 @@ export default function App() {
       <div className="bg-[#0b216b] p-4 text-white pb-safe mt-auto">
         <div className="grid grid-cols-2 gap-4">
           <div className="bg-[#1e3a8a] rounded-xl py-4 text-center border border-blue-800 shadow-inner">
-            <p className="text-xl font-bold mb-1">বাজারের হিসাব</p>
-            <p className="text-red-500 text-2xl font-black">${convertToBanglaNumber(totalExpense)}</p>
+            <p className="text-lg font-bold mb-1 text-blue-100">বাজারের হিসাব</p>
+            <p className="text-red-400 text-2xl font-black">${convertToBanglaNumber(totalExpense)}</p>
           </div>
           <div className="bg-[#1e3a8a] rounded-xl py-4 text-center border border-blue-800 shadow-inner">
-            <p className="text-xl font-bold mb-1">জন প্রতি খরচ</p>
-            <p className="text-red-500 text-2xl font-black">${convertToBanglaNumber(perPersonCost)}</p>
+            <p className="text-lg font-bold mb-1 text-blue-100">জন প্রতি খরচ</p>
+            <p className="text-red-400 text-2xl font-black">${convertToBanglaNumber(perPersonCost)}</p>
           </div>
         </div>
       </div>
@@ -217,7 +243,7 @@ export default function App() {
     const isCook = type === 'cook';
     const scheduleData = MEMBERS.map((m) => {
       const isToday = isCook ? memberNamesOnly[getCookIndex(today)] === m.name : memberNamesOnly[getCleanerIndex(today)] === m.name;
-      return { name: m.name, isToday };
+      return { ...m, isToday };
     });
 
     return (
@@ -225,9 +251,12 @@ export default function App() {
         {renderHeader(isCook ? "রান্নার সময়সূচি" : "পরিষ্কারের সময়সূচি")}
         <div className="p-4 space-y-3">
           {scheduleData.map((d, i) => (
-            <div key={i} className={`p-4 rounded-xl flex justify-between items-center border shadow-sm ${d.isToday ? 'bg-blue-50 border-blue-200' : 'bg-white border-slate-200'}`}>
-              <span className={`font-bold ${d.isToday ? 'text-blue-800 text-lg' : 'text-slate-700'}`}>{d.name}</span>
-              {d.isToday && <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-bold shadow">আজকের দায়িত্ব</span>}
+            <div key={i} className={`p-3 rounded-xl flex items-center gap-4 border shadow-sm ${d.isToday ? 'bg-blue-50 border-blue-200' : 'bg-white border-slate-200'}`}>
+              <MemberAvatar src={d.img} alt={d.name} sizeClass="w-12 h-12" />
+              <div className="flex-1">
+                <p className={`font-bold ${d.isToday ? 'text-blue-800 text-lg' : 'text-slate-700'}`}>{d.name}</p>
+                {d.isToday && <p className="text-blue-600 text-xs font-bold mt-0.5">আজকের দায়িত্ব</p>}
+              </div>
             </div>
           ))}
         </div>
@@ -240,9 +269,12 @@ export default function App() {
       {renderHeader("শায়েখ বৃন্দ")}
       <div className="p-4 grid gap-3">
         {MEMBERS.map((m, i) => (
-          <div key={i} className="bg-white p-4 rounded-xl border border-slate-200 flex justify-between items-center shadow-sm">
-            <span className="font-bold text-slate-800 text-lg">{m.name}</span>
-            <a href={`tel:${m.phone}`} className="bg-green-100 text-green-700 p-2 rounded-lg"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg></a>
+          <div key={i} className="bg-white p-3 rounded-xl border border-slate-200 flex justify-between items-center shadow-sm">
+            <div className="flex items-center gap-3">
+              <MemberAvatar src={m.img} alt={m.name} sizeClass="w-12 h-12" />
+              <span className="font-bold text-slate-800 text-lg">{m.name}</span>
+            </div>
+            <a href={`tel:${m.phone}`} className="bg-green-100 text-green-700 p-3 rounded-xl hover:bg-green-200 transition"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg></a>
           </div>
         ))}
       </div>
