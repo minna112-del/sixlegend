@@ -22,6 +22,7 @@ const TrashIcon = () => (
 );
 
 // ================= DATA =================
+// ইম্পোর্ট এরর এড়াতে ছবিগুলোর নাম সরাসরি দেওয়া হলো
 const MEMBERS = [
   { id: 'm1', name: "শায়েখ সাহাব উদ্দিন", phone: "16892532453" },
   { id: 'm2', name: "হাফেজ মহসিন", phone: "15165858019" },
@@ -66,8 +67,12 @@ export default function App() {
   const [today, setToday] = useState(new Date());
 
   const [marketItems, setMarketItems] = useState(() => {
-    const saved = localStorage.getItem('lillahi_market_items');
-    return saved ? JSON.parse(saved) : [];
+    try {
+      const saved = localStorage.getItem('lillahi_market_items');
+      return saved ? JSON.parse(saved) : [];
+    } catch (e) {
+      return [];
+    }
   });
 
   const [newItemText, setNewItemText] = useState('');
@@ -116,28 +121,28 @@ export default function App() {
             <div className="w-14 h-14 bg-orange-100 rounded-full flex items-center justify-center shadow-inner">
               <DollarIcon />
             </div>
-            <p className="font-extrabold text-[#1e1b4b]">রান্নার সময়সূচি</p>
+            <p className="font-extrabold text-[#1e1b4b] text-sm">রান্নার সময়সূচি</p>
           </button>
           
           <button onClick={() => setActiveTab('clean')} className="bg-[#ebdff0]/50 hover:bg-[#e9d5f3] transition p-6 rounded-2xl border border-purple-100 flex flex-col items-center justify-center gap-3 shadow-sm">
             <div className="w-14 h-14 bg-teal-100 rounded-full flex items-center justify-center shadow-inner">
               <ClockIcon />
             </div>
-            <p className="font-extrabold text-[#1e1b4b]">বাসা পরিষ্কার</p>
+            <p className="font-extrabold text-[#1e1b4b] text-sm">বাসা পরিষ্কার</p>
           </button>
 
           <button onClick={() => setActiveTab('members')} className="bg-[#ebdff0]/50 hover:bg-[#e9d5f3] transition p-6 rounded-2xl border border-purple-100 flex flex-col items-center justify-center gap-3 shadow-sm">
             <div className="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center shadow-inner">
               <UsersIcon />
             </div>
-            <p className="font-extrabold text-[#1e1b4b]">শায়েখ বৃন্দ</p>
+            <p className="font-extrabold text-[#1e1b4b] text-sm">শায়েখ বৃন্দ</p>
           </button>
 
           <button onClick={() => setActiveTab('accounts')} className="bg-[#ebdff0]/50 hover:bg-[#e9d5f3] transition p-6 rounded-2xl border border-purple-100 flex flex-col items-center justify-center gap-3 shadow-sm">
             <div className="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center shadow-inner">
               <CartIcon />
             </div>
-            <p className="font-extrabold text-[#1e1b4b]">আয়-ব্যয়ের হিসাব</p>
+            <p className="font-extrabold text-[#1e1b4b] text-sm">আয়-ব্যয়ের হিসাব</p>
           </button>
         </div>
 
@@ -159,11 +164,11 @@ export default function App() {
         <div className="grid grid-cols-2 gap-4">
           <div className="bg-[#1e3a8a] rounded-xl py-4 text-center border border-blue-800 shadow-inner">
             <p className="text-xl font-bold mb-1">বাজারের হিসাব</p>
-            <p className="text-red-500 text-3xl font-black">${convertToBanglaNumber(totalExpense)}</p>
+            <p className="text-red-500 text-2xl font-black">${convertToBanglaNumber(totalExpense)}</p>
           </div>
           <div className="bg-[#1e3a8a] rounded-xl py-4 text-center border border-blue-800 shadow-inner">
             <p className="text-xl font-bold mb-1">জন প্রতি খরচ</p>
-            <p className="text-red-500 text-3xl font-black">${convertToBanglaNumber(perPersonCost)}</p>
+            <p className="text-red-500 text-2xl font-black">${convertToBanglaNumber(perPersonCost)}</p>
           </div>
         </div>
       </div>
@@ -247,7 +252,7 @@ export default function App() {
   return (
     <div className="min-h-screen bg-slate-200 flex justify-center items-center">
       {/* Mobile Frame Container */}
-      <div className="w-full max-w-[400px] h-[100dvh] sm:h-[850px] sm:my-8 bg-white sm:rounded-[3rem] sm:shadow-2xl overflow-hidden relative border-8 border-transparent">
+      <div className="w-full max-w-[400px] h-[100dvh] sm:h-[850px] bg-white sm:rounded-[3rem] sm:shadow-2xl overflow-hidden relative border-8 border-transparent">
         {activeTab === 'home' && renderHome()}
         {activeTab === 'cook' && renderSchedule('cook')}
         {activeTab === 'clean' && renderSchedule('clean')}
