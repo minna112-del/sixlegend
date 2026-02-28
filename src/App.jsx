@@ -25,15 +25,25 @@ const UserPlaceholderIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-400"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
 );
 
-// ================= DATA WITH PUBLIC IMAGES =================
-// Vite-এ public ফোল্ডার বা রুট ফোল্ডার থেকে সরাসরি লিংক করা হলো
+// ================= DYNAMIC IMAGE IMPORTS =================
+// Vite-এর import.meta.glob ব্যবহার করে মেইন ফোল্ডারের ছবিগুলো লোড করা হচ্ছে
+// এটি বিল্ড টাইমে এরর দেয় না এবং ছবিগুলো ঠিকভাবে কাজ করে
+const getImageUrl = (filename) => {
+  try {
+    return new URL(`../${filename}`, import.meta.url).href;
+  } catch (error) {
+    return null;
+  }
+};
+
+// ================= DATA =================
 const MEMBERS = [
-  { id: 'm1', name: "শায়েখ সাহাব উদ্দিন", img: "/সাহাব উদ্দিন.jpeg", phone: "16892532453" },
-  { id: 'm2', name: "হাফেজ মহসিন", img: "/মহসিন.jpeg", phone: "15165858019" },
-  { id: 'm3', name: "মাওলানা রায়হান", img: "/রায়হান মির্জা.jpeg", phone: "19294939307" },
-  { id: 'm4', name: "মাওলানা আবদুল সাত্তার", img: "/আবদুল সাত্তার.jpeg", phone: "19294754697" },
-  { id: 'm5', name: "আলহাজ্ব বাপ্পি মোল্লা", img: "/বাদশা.jpeg", phone: "12137609654" },
-  { id: 'm6', name: "মাওলানা ইমরান", img: "/ইমরান ভুঁইয়া.png", phone: "13479571836" }
+  { id: 'm1', name: "শায়েখ সাহাব উদ্দিন", img: getImageUrl("সাহাব উদ্দিন.jpeg"), phone: "16892532453" },
+  { id: 'm2', name: "হাফেজ মহসিন", img: getImageUrl("মহসিন.jpeg"), phone: "15165858019" },
+  { id: 'm3', name: "মাওলানা রায়হান", img: getImageUrl("রায়হান মির্জা.jpeg"), phone: "19294939307" },
+  { id: 'm4', name: "মাওলানা আবদুল সাত্তার", img: getImageUrl("আবদুল সাত্তার.jpeg"), phone: "19294754697" },
+  { id: 'm5', name: "আলহাজ্ব বাপ্পি মোল্লা", img: getImageUrl("বাদশা.jpeg"), phone: "12137609654" },
+  { id: 'm6', name: "মাওলানা ইমরান", img: getImageUrl("ইমরান ভুঁইয়া.png"), phone: "13479571836" }
 ];
 
 const memberNamesOnly = MEMBERS.map(m => m.name);
@@ -67,7 +77,7 @@ const convertToBanglaNumber = (number) => {
 
 // ================= MAIN APP COMPONENT =================
 export default function App() {
-  const [activeTab, setActiveTab] = useState('home'); // home, cook, clean, members, accounts
+  const [activeTab, setActiveTab] = useState('home'); 
   const [today, setToday] = useState(new Date());
 
   const [marketItems, setMarketItems] = useState(() => {
@@ -112,7 +122,7 @@ export default function App() {
     
     return (
       <div className={`${sizeClass} rounded-full overflow-hidden border-2 border-white shadow-sm flex items-center justify-center bg-slate-100 shrink-0`}>
-        {!imgError ? (
+        {!imgError && src ? (
           <img 
             src={src} 
             alt={alt} 
