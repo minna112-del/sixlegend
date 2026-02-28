@@ -1,42 +1,34 @@
 import React, { useState, useEffect } from 'react';
 
 // ================= ICONS (Inline SVGs) =================
+const DollarIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+);
+
+const ClockIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#0d9488" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 22h14"/><path d="M5 2h14"/><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"/><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"/></svg>
+);
+
+const UsersIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+);
+
+const CartIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
+);
+
 const TrashIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
 );
 
-const HomeIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-);
-
-const WalletIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a8 8 0 0 1-5 15H4a2 2 0 0 1-2-2V4"/><path d="M22 13v-2"/><path d="M22 17v-2"/></svg>
-);
-
-const CalendarIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
-);
-
-const WhatsappIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
-);
-
-// ================= IMAGE IMPORTS =================
-import imgSahabUddin from '../সাহাব উদ্দিন.jpeg';
-import imgMahsin from '../মহসিন.jpeg';
-import imgRayhan from '../রায়হান মির্জা.jpeg';
-import imgSattar from '../আবদুল সাত্তার.jpeg';
-import imgBadsha from '../বাদশা.jpeg';
-import imgImran from '../ইমরান ভুঁইয়া.png';
-
 // ================= DATA =================
 const MEMBERS = [
-  { id: 'm1', name: "শায়েখ সাহাব উদ্দিন", img: imgSahabUddin, phone: "16892532453" },
-  { id: 'm2', name: "হাফেজ মহসিন", img: imgMahsin, phone: "15165858019" },
-  { id: 'm3', name: "মাওলানা রায়হান", img: imgRayhan, phone: "19294939307" },
-  { id: 'm4', name: "মাওলানা আবদুল সাত্তার", img: imgSattar, phone: "19294754697" },
-  { id: 'm5', name: "আলহাজ্ব বাপ্পি মোল্লা", img: imgBadsha, phone: "12137609654" },
-  { id: 'm6', name: "মাওলানা ইমরান", img: imgImran, phone: "13479571836" }
+  { id: 'm1', name: "শায়েখ সাহাব উদ্দিন", phone: "16892532453" },
+  { id: 'm2', name: "হাফেজ মহসিন", phone: "15165858019" },
+  { id: 'm3', name: "মাওলানা রায়হান", phone: "19294939307" },
+  { id: 'm4', name: "মাওলানা আবদুল সাত্তার", phone: "19294754697" },
+  { id: 'm5', name: "আলহাজ্ব বাপ্পি মোল্লা", phone: "12137609654" },
+  { id: 'm6', name: "মাওলানা ইমরান", phone: "13479571836" }
 ];
 
 const memberNamesOnly = MEMBERS.map(m => m.name);
@@ -63,16 +55,14 @@ const getCleanerIndex = (date) => {
   return 0;
 };
 
-const monthNames = ["জানুয়ারি", "ফেব্রুয়ারি", "মার্চ", "এপ্রিল", "মে", "জুন", "জুলাই", "আগস্ট", "সেপ্টেম্বর", "অক্টোবর", "নভেম্বর", "ডিসেম্বর"];
-
 const convertToBanglaNumber = (number) => {
   const banglaNumbers = { '0': '০', '1': '১', '2': '২', '3': '৩', '4': '৪', '5': '৫', '6': '৬', '7': '৭', '8': '৮', '9': '৯' };
-  return number.toString().replace(/[0-9]/g, x => banglaNumbers[x]);
+  return number.toFixed(2).replace(/[0-9]/g, x => banglaNumbers[x]);
 };
 
-// ================= APP COMPONENT =================
+// ================= MAIN APP COMPONENT =================
 export default function App() {
-  const [activeTab, setActiveTab] = useState('dashboard'); // dashboard, schedule, accounts
+  const [activeTab, setActiveTab] = useState('home'); // home, cook, clean, members, accounts
   const [today, setToday] = useState(new Date());
 
   const [marketItems, setMarketItems] = useState(() => {
@@ -83,32 +73,19 @@ export default function App() {
   const [newItemText, setNewItemText] = useState('');
   const [newAmount, setNewAmount] = useState('');
   const [selectedBuyer, setSelectedBuyer] = useState(memberNamesOnly[0]);
-  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
 
-  useEffect(() => {
-    setToday(new Date());
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem('lillahi_market_items', JSON.stringify(marketItems));
-  }, [marketItems]);
+  useEffect(() => { setToday(new Date()); }, []);
+  useEffect(() => { localStorage.setItem('lillahi_market_items', JSON.stringify(marketItems)); }, [marketItems]);
 
   const handleAddExpense = (e) => {
     e.preventDefault();
     if (!newItemText.trim() || !newAmount) return;
-    
     const newItem = {
-      id: Date.now().toString(),
-      item: newItemText.trim(),
-      amount: Number(newAmount),
-      buyer: selectedBuyer,
-      date: new Date().toISOString(),
-      month: new Date().getMonth()
+      id: Date.now().toString(), item: newItemText.trim(), amount: Number(newAmount),
+      buyer: selectedBuyer, date: new Date().toISOString()
     };
-
     setMarketItems([newItem, ...marketItems]);
-    setNewItemText(''); 
-    setNewAmount('');
+    setNewItemText(''); setNewAmount('');
   };
 
   const handleDeleteExpense = (id) => {
@@ -117,265 +94,165 @@ export default function App() {
     }
   };
 
-  // Calculations
-  const activeMonthItems = marketItems.filter(item => {
-    const itemMonth = item.month !== undefined ? item.month : new Date(item.date).getMonth();
-    return itemMonth === selectedMonth;
-  });
-
-  const totalExpense = activeMonthItems.reduce((sum, item) => sum + item.amount, 0);
+  const totalExpense = marketItems.reduce((sum, item) => sum + item.amount, 0);
   const perPersonCost = MEMBERS.length > 0 ? totalExpense / MEMBERS.length : 0;
 
-  const spentByMember = MEMBERS.map(m => {
-    const spent = activeMonthItems.filter(i => i.buyer === m.name).reduce((sum, i) => sum + i.amount, 0);
-    return { name: m.name, img: m.img, spent: spent, balance: spent - perPersonCost };
-  });
+  // ================= RENDER HOME =================
+  const renderHome = () => (
+    <div className="flex flex-col h-full bg-[#f4f1f8]">
+      
+      {/* Top Header */}
+      <div className="bg-[#1e3a8a] text-center py-5 shadow-md z-10">
+        <h1 className="text-yellow-400 text-3xl font-black mb-1 tracking-wider">লিল্লাহি এতিমখানা</h1>
+        <h2 className="text-white text-xl font-bold">দার আইতাম লিলাহ</h2>
+      </div>
 
-  // ================= VIEW COMPONENTS =================
-  
-  const renderDashboard = () => (
-    <div className="space-y-6 animate-fade-in">
-      {/* Top Stats */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-center">
-          <p className="text-slate-500 text-sm font-semibold mb-1">{monthNames[selectedMonth]} মাসের মোট খরচ</p>
-          <p className="text-3xl font-black text-slate-800">৳{convertToBanglaNumber(totalExpense)}</p>
+      {/* Main Content Area */}
+      <div className="flex-1 p-4 flex flex-col justify-center">
+        
+        {/* 4 Menu Grid */}
+        <div className="grid grid-cols-2 gap-4 mb-8">
+          <button onClick={() => setActiveTab('cook')} className="bg-[#ebdff0]/50 hover:bg-[#e9d5f3] transition p-6 rounded-2xl border border-purple-100 flex flex-col items-center justify-center gap-3 shadow-sm">
+            <div className="w-14 h-14 bg-orange-100 rounded-full flex items-center justify-center shadow-inner">
+              <DollarIcon />
+            </div>
+            <p className="font-extrabold text-[#1e1b4b]">রান্নার সময়সূচি</p>
+          </button>
+          
+          <button onClick={() => setActiveTab('clean')} className="bg-[#ebdff0]/50 hover:bg-[#e9d5f3] transition p-6 rounded-2xl border border-purple-100 flex flex-col items-center justify-center gap-3 shadow-sm">
+            <div className="w-14 h-14 bg-teal-100 rounded-full flex items-center justify-center shadow-inner">
+              <ClockIcon />
+            </div>
+            <p className="font-extrabold text-[#1e1b4b]">বাসা পরিষ্কার</p>
+          </button>
+
+          <button onClick={() => setActiveTab('members')} className="bg-[#ebdff0]/50 hover:bg-[#e9d5f3] transition p-6 rounded-2xl border border-purple-100 flex flex-col items-center justify-center gap-3 shadow-sm">
+            <div className="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center shadow-inner">
+              <UsersIcon />
+            </div>
+            <p className="font-extrabold text-[#1e1b4b]">শায়েখ বৃন্দ</p>
+          </button>
+
+          <button onClick={() => setActiveTab('accounts')} className="bg-[#ebdff0]/50 hover:bg-[#e9d5f3] transition p-6 rounded-2xl border border-purple-100 flex flex-col items-center justify-center gap-3 shadow-sm">
+            <div className="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center shadow-inner">
+              <CartIcon />
+            </div>
+            <p className="font-extrabold text-[#1e1b4b]">আয়-ব্যয়ের হিসাব</p>
+          </button>
         </div>
-        <div className="bg-emerald-600 p-5 rounded-2xl shadow-md text-white flex flex-col justify-center">
-          <p className="text-emerald-100 text-sm font-semibold mb-1">জনপ্রতি খরচ (৬ জন)</p>
-          <p className="text-3xl font-black">৳{convertToBanglaNumber(Math.round(perPersonCost))}</p>
+
+        {/* Current Duties */}
+        <div className="grid grid-cols-2 gap-4 mb-6">
+          <div className="bg-white rounded-xl py-3 px-2 text-center shadow-sm border border-red-100">
+            <p className="text-red-500 font-semibold text-sm mb-0.5">নোয়াখাইল্লা শেফ</p>
+            <p className="text-red-600 font-bold text-sm">{memberNamesOnly[getCookIndex(today)]}</p>
+          </div>
+          <div className="bg-white rounded-xl py-3 px-2 text-center shadow-sm border border-pink-100">
+            <p className="text-pink-400 font-semibold text-sm mb-0.5">প্রফেশনাল ক্লিনার</p>
+            <p className="text-pink-500 font-bold text-sm">{memberNamesOnly[getCleanerIndex(today)]}</p>
+          </div>
         </div>
       </div>
 
-      {/* Today's Duty Summary */}
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-        <div className="bg-slate-50 px-5 py-3 border-b border-slate-100 flex justify-between items-center">
-          <h3 className="font-bold text-slate-700">আজকের দায়িত্ব</h3>
-          <span className="text-xs bg-slate-200 text-slate-600 px-2 py-1 rounded-md font-medium">
-            {convertToBanglaNumber(today.getDate())} {monthNames[today.getMonth()]}
-          </span>
-        </div>
-        <div className="p-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="flex items-center gap-4 bg-emerald-50 p-3 rounded-xl border border-emerald-100">
-            <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-white shadow-sm shrink-0">
-               <img src={MEMBERS[getCookIndex(today)]?.img} alt="Cook" className="w-full h-full object-cover" />
-            </div>
-            <div>
-              <p className="text-xs text-emerald-600 font-bold uppercase tracking-wider">রান্না</p>
-              <p className="font-bold text-slate-800">{memberNamesOnly[getCookIndex(today)]}</p>
-            </div>
+      {/* Bottom Summary Footer */}
+      <div className="bg-[#0b216b] p-4 text-white pb-safe mt-auto">
+        <div className="grid grid-cols-2 gap-4">
+          <div className="bg-[#1e3a8a] rounded-xl py-4 text-center border border-blue-800 shadow-inner">
+            <p className="text-xl font-bold mb-1">বাজারের হিসাব</p>
+            <p className="text-red-500 text-3xl font-black">${convertToBanglaNumber(totalExpense)}</p>
           </div>
-          <div className="flex items-center gap-4 bg-teal-50 p-3 rounded-xl border border-teal-100">
-            <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-white shadow-sm shrink-0">
-               <img src={MEMBERS[getCleanerIndex(today)]?.img} alt="Cleaner" className="w-full h-full object-cover" />
-            </div>
-            <div>
-              <p className="text-xs text-teal-600 font-bold uppercase tracking-wider">পরিষ্কার</p>
-              <p className="font-bold text-slate-800">{memberNamesOnly[getCleanerIndex(today)]}</p>
-            </div>
+          <div className="bg-[#1e3a8a] rounded-xl py-4 text-center border border-blue-800 shadow-inner">
+            <p className="text-xl font-bold mb-1">জন প্রতি খরচ</p>
+            <p className="text-red-500 text-3xl font-black">${convertToBanglaNumber(perPersonCost)}</p>
           </div>
-        </div>
-      </div>
-
-      {/* Balance Overview */}
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-5">
-        <h3 className="font-bold text-slate-700 mb-4">সদস্যদের হিসাবের অবস্থা</h3>
-        <div className="space-y-3">
-          {spentByMember.map((m, idx) => {
-            const isOwe = m.balance < 0;
-            const isReceive = m.balance > 0;
-            return (
-              <div key={idx} className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100">
-                <div className="flex items-center gap-3">
-                  <img src={m.img} alt={m.name} className="w-8 h-8 rounded-full border border-slate-300 object-cover" />
-                  <p className="font-semibold text-slate-800 text-sm">{m.name}</p>
-                </div>
-                <div className="text-right">
-                  <span className={`text-xs font-bold px-2 py-0.5 rounded-full mr-2 ${
-                    isReceive ? 'bg-emerald-100 text-emerald-700' : isOwe ? 'bg-red-100 text-red-700' : 'bg-slate-200 text-slate-600'
-                  }`}>
-                    {isReceive ? 'পাবে' : isOwe ? 'দেবে' : 'ক্লিয়ার'}
-                  </span>
-                  <span className={`font-black ${isReceive ? 'text-emerald-600' : isOwe ? 'text-red-600' : 'text-slate-500'}`}>
-                    {isOwe || isReceive ? `৳${convertToBanglaNumber(Math.round(Math.abs(m.balance)))}` : '-'}
-                  </span>
-                </div>
-              </div>
-            )
-          })}
         </div>
       </div>
     </div>
   );
 
-  const renderSchedule = () => (
-    <div className="space-y-6 animate-fade-in">
-      <h2 className="text-2xl font-bold text-slate-800">পূর্ণ শিডিউল</h2>
-      {/* Cooking Schedule */}
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-        <div className="bg-orange-50 px-5 py-4 border-b border-orange-100 flex items-center gap-3">
-          <span className="text-2xl">👨‍🍳</span>
-          <h3 className="font-bold text-orange-900 text-lg">রান্নার সিরিয়াল</h3>
-        </div>
-        <div className="p-2">
-          {MEMBERS.map((m, idx) => {
-             // Calculate if this person is cooking today
-             const isTodayCook = memberNamesOnly[getCookIndex(today)] === m.name;
-             return (
-              <div key={idx} className={`flex items-center gap-4 p-3 rounded-xl mb-1 ${isTodayCook ? 'bg-orange-100 border border-orange-200' : ''}`}>
-                <img src={m.img} alt={m.name} className={`w-10 h-10 rounded-full object-cover ${isTodayCook ? 'border-2 border-orange-500' : ''}`} />
-                <p className={`font-semibold flex-1 ${isTodayCook ? 'text-orange-900' : 'text-slate-700'}`}>{m.name}</p>
-                {isTodayCook && <span className="bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded-lg">আজকে</span>}
-              </div>
-             )
-          })}
-        </div>
-      </div>
-
-      {/* Cleaning Schedule */}
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-        <div className="bg-blue-50 px-5 py-4 border-b border-blue-100 flex items-center gap-3">
-          <span className="text-2xl">🧹</span>
-          <h3 className="font-bold text-blue-900 text-lg">পরিষ্কারের সিরিয়াল (৫ দিন পর পর)</h3>
-        </div>
-        <div className="p-2">
-          {MEMBERS.map((m, idx) => {
-             const isTodayCleaner = memberNamesOnly[getCleanerIndex(today)] === m.name;
-             return (
-              <div key={idx} className={`flex items-center gap-4 p-3 rounded-xl mb-1 ${isTodayCleaner ? 'bg-blue-100 border border-blue-200' : ''}`}>
-                <img src={m.img} alt={m.name} className={`w-10 h-10 rounded-full object-cover ${isTodayCleaner ? 'border-2 border-blue-500' : ''}`} />
-                <p className={`font-semibold flex-1 ${isTodayCleaner ? 'text-blue-900' : 'text-slate-700'}`}>{m.name}</p>
-                {isTodayCleaner && <span className="bg-blue-500 text-white text-xs font-bold px-2 py-1 rounded-lg">চলমান</span>}
-              </div>
-             )
-          })}
-        </div>
-      </div>
+  // ================= SUB-PAGES =================
+  const renderHeader = (title) => (
+    <div className="bg-[#1e3a8a] text-white p-4 flex items-center gap-4 shadow-md sticky top-0 z-10">
+      <button onClick={() => setActiveTab('home')} className="bg-white/20 p-2 rounded-full hover:bg-white/30 transition">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+      </button>
+      <h2 className="text-xl font-bold">{title}</h2>
     </div>
   );
 
   const renderAccounts = () => (
-    <div className="space-y-6 animate-fade-in">
-      <div className="flex justify-between items-end">
-        <h2 className="text-2xl font-bold text-slate-800">হিসাব-নিকাশ</h2>
-        <select 
-          className="bg-white border border-slate-200 text-sm font-bold rounded-xl px-4 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-          value={selectedMonth}
-          onChange={(e) => setSelectedMonth(Number(e.target.value))}
-        >
-          {monthNames.map((m, idx) => <option key={idx} value={idx}>{m} মাস</option>)}
-        </select>
-      </div>
-
-      {/* Add New Form */}
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-5">
-        <form onSubmit={handleAddExpense} className="space-y-4">
-          <input 
-            type="text" 
-            placeholder="কী বাজার করা হলো?" 
-            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-            value={newItemText} onChange={(e)=>setNewItemText(e.target.value)} required 
-          />
-          <div className="flex gap-3">
-            <input 
-              type="number" placeholder="টাকা" 
-              className="w-1/3 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-              value={newAmount} onChange={(e)=>setNewAmount(e.target.value)} required 
-            />
-            <select 
-              className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-              value={selectedBuyer} onChange={(e)=>setSelectedBuyer(e.target.value)}
-            >
-              {memberNamesOnly.map(name => <option key={name} value={name}>{name}</option>)}
-            </select>
-          </div>
-          <button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl transition-colors">
-            হিসাবে যুক্ত করুন
-          </button>
-        </form>
-      </div>
-
-      {/* List */}
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-5">
-        <h3 className="font-bold text-slate-700 mb-4">বাজারের তালিকা</h3>
-        <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
-          {activeMonthItems.length === 0 ? (
-            <p className="text-center text-slate-400 py-10 text-sm">কোনো হিসাব নেই</p>
-          ) : (
-            activeMonthItems.map(item => (
-              <div key={item.id} className="flex justify-between items-center bg-slate-50 p-3.5 rounded-xl border border-slate-100">
-                <div>
-                  <p className="font-bold text-slate-800">{item.item}</p>
-                  <p className="text-xs text-slate-500 mt-0.5">ক্রেতা: <span className="font-semibold text-emerald-700">{item.buyer}</span></p>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className="font-black text-slate-700">৳{convertToBanglaNumber(item.amount)}</span>
-                  <button onClick={()=>handleDeleteExpense(item.id)} className="text-red-400 hover:bg-red-50 p-1.5 rounded-md">
-                    <TrashIcon />
-                  </button>
-                </div>
-              </div>
-            ))
-          )}
+    <div className="h-full flex flex-col bg-slate-50">
+      {renderHeader("আয়-ব্যয়ের হিসাব")}
+      <div className="p-4 space-y-4 overflow-y-auto">
+        <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
+          <form onSubmit={handleAddExpense} className="space-y-3">
+            <input type="text" placeholder="পণ্যের নাম" className="w-full bg-slate-50 border p-3 rounded-xl focus:outline-none focus:border-blue-500" value={newItemText} onChange={(e)=>setNewItemText(e.target.value)} required />
+            <div className="flex gap-2">
+              <input type="number" placeholder="পরিমাণ ($)" className="w-1/3 bg-slate-50 border p-3 rounded-xl focus:outline-none focus:border-blue-500" value={newAmount} onChange={(e)=>setNewAmount(e.target.value)} required />
+              <select className="flex-1 bg-slate-50 border p-3 rounded-xl focus:outline-none focus:border-blue-500" value={selectedBuyer} onChange={(e)=>setSelectedBuyer(e.target.value)}>
+                {memberNamesOnly.map(name => <option key={name} value={name}>{name}</option>)}
+              </select>
+            </div>
+            <button type="submit" className="w-full bg-blue-600 text-white font-bold py-3 rounded-xl">যুক্ত করুন</button>
+          </form>
         </div>
+        <div className="space-y-2 pb-20">
+          {marketItems.map(item => (
+            <div key={item.id} className="bg-white p-3 rounded-xl border flex justify-between items-center shadow-sm">
+              <div><p className="font-bold text-slate-800">{item.item}</p><p className="text-xs text-blue-600 font-semibold">{item.buyer}</p></div>
+              <div className="flex items-center gap-3"><span className="font-black text-red-500">${convertToBanglaNumber(item.amount)}</span><button onClick={()=>handleDeleteExpense(item.id)} className="text-slate-400 hover:text-red-500"><TrashIcon /></button></div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderSchedule = (type) => {
+    const isCook = type === 'cook';
+    const scheduleData = MEMBERS.map((m) => {
+      const isToday = isCook ? memberNamesOnly[getCookIndex(today)] === m.name : memberNamesOnly[getCleanerIndex(today)] === m.name;
+      return { name: m.name, isToday };
+    });
+
+    return (
+      <div className="h-full flex flex-col bg-slate-50">
+        {renderHeader(isCook ? "রান্নার সময়সূচি" : "পরিষ্কারের সময়সূচি")}
+        <div className="p-4 space-y-3">
+          {scheduleData.map((d, i) => (
+            <div key={i} className={`p-4 rounded-xl flex justify-between items-center border shadow-sm ${d.isToday ? 'bg-blue-50 border-blue-200' : 'bg-white border-slate-200'}`}>
+              <span className={`font-bold ${d.isToday ? 'text-blue-800 text-lg' : 'text-slate-700'}`}>{d.name}</span>
+              {d.isToday && <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-bold shadow">আজকের দায়িত্ব</span>}
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  const renderMembers = () => (
+    <div className="h-full flex flex-col bg-slate-50">
+      {renderHeader("শায়েখ বৃন্দ")}
+      <div className="p-4 grid gap-3">
+        {MEMBERS.map((m, i) => (
+          <div key={i} className="bg-white p-4 rounded-xl border border-slate-200 flex justify-between items-center shadow-sm">
+            <span className="font-bold text-slate-800 text-lg">{m.name}</span>
+            <a href={`tel:${m.phone}`} className="bg-green-100 text-green-700 p-2 rounded-lg"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg></a>
+          </div>
+        ))}
       </div>
     </div>
   );
 
   return (
-    <div className="min-h-screen bg-slate-100 font-sans text-slate-800 pb-24 md:pb-8 flex justify-center">
-      
-      {/* Mobile-first Container */}
-      <div className="w-full max-w-md bg-slate-100 min-h-screen relative flex flex-col shadow-2xl">
-        
-        {/* Top App Bar */}
-        <header className="bg-white px-5 py-4 flex justify-between items-center sticky top-0 z-10 shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center text-white font-black text-xl shadow-md">
-              ল
-            </div>
-            <div>
-              <h1 className="font-black text-slate-800 text-lg leading-tight">লিল্লাহি এতিমখানা</h1>
-              <p className="text-[10px] font-bold text-emerald-600 tracking-wider">ম্যানেজমেন্ট ড্যাশবোর্ড</p>
-            </div>
-          </div>
-          <a href={whatsappLink} target="_blank" rel="noopener noreferrer" className="text-emerald-500 bg-emerald-50 p-2 rounded-full hover:bg-emerald-100 transition">
-            <WhatsappIcon />
-          </a>
-        </header>
-
-        {/* Main Content Area */}
-        <main className="flex-1 p-5 overflow-y-auto">
-          {activeTab === 'dashboard' && renderDashboard()}
-          {activeTab === 'schedule' && renderSchedule()}
-          {activeTab === 'accounts' && renderAccounts()}
-        </main>
-
-        {/* Bottom Navigation Bar (App-like) */}
-        <nav className="fixed md:absolute bottom-0 w-full max-w-md bg-white border-t border-slate-200 px-6 py-3 flex justify-between items-center pb-safe shadow-[0_-4px_20px_rgba(0,0,0,0.05)] z-20">
-          <button 
-            onClick={() => setActiveTab('dashboard')}
-            className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${activeTab === 'dashboard' ? 'text-emerald-600' : 'text-slate-400 hover:text-slate-600'}`}
-          >
-            <HomeIcon />
-            <span className="text-[10px] font-bold">হোম</span>
-          </button>
-          <button 
-            onClick={() => setActiveTab('schedule')}
-            className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${activeTab === 'schedule' ? 'text-emerald-600' : 'text-slate-400 hover:text-slate-600'}`}
-          >
-            <CalendarIcon />
-            <span className="text-[10px] font-bold">শিডিউল</span>
-          </button>
-          <button 
-            onClick={() => setActiveTab('accounts')}
-            className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${activeTab === 'accounts' ? 'text-emerald-600' : 'text-slate-400 hover:text-slate-600'}`}
-          >
-            <WalletIcon />
-            <span className="text-[10px] font-bold">হিসাব</span>
-          </button>
-        </nav>
-
+    <div className="min-h-screen bg-slate-200 flex justify-center items-center">
+      {/* Mobile Frame Container */}
+      <div className="w-full max-w-[400px] h-[100dvh] sm:h-[850px] sm:my-8 bg-white sm:rounded-[3rem] sm:shadow-2xl overflow-hidden relative border-8 border-transparent">
+        {activeTab === 'home' && renderHome()}
+        {activeTab === 'cook' && renderSchedule('cook')}
+        {activeTab === 'clean' && renderSchedule('clean')}
+        {activeTab === 'members' && renderMembers()}
+        {activeTab === 'accounts' && renderAccounts()}
       </div>
     </div>
   );
