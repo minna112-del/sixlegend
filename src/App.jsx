@@ -196,7 +196,7 @@ export default function App() {
     await addDoc(collection(db, "expenses"), payload);
 
     // WhatsApp share prompt
-    const msg = `বাজার যোগ হয়েছে (${monthLabelBn(monthKey)})\nপণ্য: ${payload.item}\nদাম: $${Number(payload.amount).toFixed(2)}\nতারিখ: ${new Date(ts).toLocaleDateString("bn-BD")}\nকিনেছেন: ${payload.buyer}\nলিংক: ${window.location.origin}`;
+    const msg = `বাজার করা হয়েছে (${monthLabelBn(monthKey)})\nপণ্য: ${payload.item}\nদাম: $${Number(payload.amount).toFixed(2)}\nতারিখ: ${new Date(ts).toLocaleDateString("bn-BD")}\nকিনেছেন: ${payload.buyer}\nলিংক: ${window.location.origin}`;
     setShareText(msg); setShareOpen(true);
 
     setNewItemText(""); setNewAmount(""); 
@@ -277,7 +277,7 @@ export default function App() {
     return (
       <div className="min-h-screen bg-slate-200 flex justify-center items-center p-4">
         <div className="w-full max-w-[420px] bg-white rounded-3xl shadow-2xl overflow-hidden">
-          <div className="bg-[#1e3a8a] text-center py-6 px-4"><h1 className="text-yellow-400 text-3xl font-black mb-1 tracking-wider">লিল্লাহি এতিমখানা</h1><p className="text-white/90 font-bold">প্রবেশ কোড দিন</p></div>
+          <div className="bg-[#1e3a8a] text-center py-6 px-4"><h1 className="text-yellow-400 text-3xl font-black mb-1 tracking-wider">হিসাবের খাতা</h1><p className="text-white/90 font-bold">প্রবেশ কোড দিন</p></div>
           <div className="p-5 space-y-3">
             <input inputMode="numeric" type="password" maxLength={6} value={pinInput} onChange={(e) => setPinInput(e.target.value)} placeholder="কোড (1126)" className="w-full bg-slate-50 border p-4 rounded-2xl focus:outline-none focus:border-blue-500 text-center text-lg tracking-widest" />
             {pinError && <p className="text-red-600 text-sm font-semibold text-center">{pinError}</p>}
@@ -300,13 +300,13 @@ export default function App() {
 
   const renderHome = () => (
     <div className="flex flex-col h-full bg-[#f4f1f8]">
-      <div className="bg-[#1e3a8a] text-center py-5 shadow-md z-10"><h1 className="text-yellow-400 text-3xl font-black mb-1 tracking-wider">⭐বাসা নাম্বার - 112⭐</h1><h2 className="text-white text-xl font-bold">دار أيتام ليلاه</h2></div>
+      <div className="bg-[#1e3a8a] text-center py-5 shadow-md z-10"><h1 className="text-yellow-400 text-3xl font-black mb-1 tracking-wider">⭐হিসাবের খাতা</h1><h2 className="text-white text-xl font-bold">Crafted by Mahsin<
       <div className="flex-1 p-4 flex flex-col justify-center">
         <div className="grid grid-cols-2 gap-4 mb-8">
           <button onClick={() => setActiveTab("cook")} className="bg-[#ebdff0]/50 hover:bg-[#e9d5f3] transition p-6 rounded-2xl border border-purple-100 flex flex-col items-center justify-center gap-3 shadow-sm"><div className="w-14 h-14 bg-orange-100 rounded-full flex items-center justify-center shadow-inner"><DollarIcon /></div><p className="font-extrabold text-[#1e1b4b] text-sm">রান্নার সময়সূচি</p></button>
           <button onClick={() => setActiveTab("clean")} className="bg-[#ebdff0]/50 hover:bg-[#e9d5f3] transition p-6 rounded-2xl border border-purple-100 flex flex-col items-center justify-center gap-3 shadow-sm"><div className="w-14 h-14 bg-teal-100 rounded-full flex items-center justify-center shadow-inner"><ClockIcon /></div><p className="font-extrabold text-[#1e1b4b] text-sm">বাসা পরিষ্কার</p></button>
-          <button onClick={() => setActiveTab("members")} className="bg-[#ebdff0]/50 hover:bg-[#e9d5f3] transition p-6 rounded-2xl border border-purple-100 flex flex-col items-center justify-center gap-3 shadow-sm"><div className="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center shadow-inner"><UsersIcon /></div><p className="font-extrabold text-[#1e1b4b] text-sm">শায়েখ বৃন্দ</p></button>
-          <button onClick={() => setActiveTab("accounts")} className="bg-[#ebdff0]/50 hover:bg-[#e9d5f3] transition p-6 rounded-2xl border border-purple-100 flex flex-col items-center justify-center gap-3 shadow-sm"><div className="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center shadow-inner"><CartIcon /></div><p className="font-extrabold text-[#1e1b4b] text-sm">আয়-ব্যয়ের হিসাব</p></button>
+          <button onClick={() => setActiveTab("members")} className="bg-[#ebdff0]/50 hover:bg-[#e9d5f3] transition p-6 rounded-2xl border border-purple-100 flex flex-col items-center justify-center gap-3 shadow-sm"><div className="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center shadow-inner"><UsersIcon /></div><p className="font-extrabold text-[#1e1b4b] text-sm">বাসার সদস্যগণ</p></button>
+          <button onClick={() => setActiveTab("accounts")} className="bg-[#ebdff0]/50 hover:bg-[#e9d5f3] transition p-6 rounded-2xl border border-purple-100 flex flex-col items-center justify-center gap-3 shadow-sm"><div className="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center shadow-inner"><CartIcon /></div><p className="font-extrabold text-[#1e1b4b] text-sm">হিসাব</p></button>
         </div>
         <div className="grid grid-cols-2 gap-4 mb-6">
           <div className="bg-white rounded-xl py-3 px-2 text-center shadow-sm border border-red-100 flex flex-col items-center"><MemberAvatar src={MEMBERS[getCookIndex(today)]?.img} alt="Cook" sizeClass="w-10 h-10 mb-2" /><p className="text-red-500 font-semibold text-[11px] mb-0.5 uppercase tracking-wide">আজকের শেফ</p><p className="text-red-700 font-bold text-sm leading-tight">{memberNamesOnly[getCookIndex(today)]}</p></div>
@@ -352,7 +352,7 @@ export default function App() {
 
         {/* Per member */}
         <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
-          <h3 className="text-lg font-bold mb-3 text-slate-800 border-b pb-2">প্রত্যেকের হিসাব</h3>
+          <h3 className="text-lg font-bold mb-3 text-slate-800 border-b pb-2">প্রত্যেক সদস্যের হিসাব</h3>
           <div className="space-y-2">
             {memberNamesOnly.map((name) => {
               const spent = memberSpending[name]; const shouldPay = perPersonTotal[name]; const balance = balances[name];
@@ -398,7 +398,7 @@ export default function App() {
         {/* List */}
         <div className="space-y-2">
           <h3 className="text-lg font-bold text-slate-800 mb-2">বাজার লিস্ট</h3>
-          {loading ? (<p className="text-center text-slate-500 py-4">লোড হচ্ছে...</p>) : marketItems.length === 0 ? (<p className="text-center text-slate-400 py-4">এই মাসে কোনো খরচ যুক্ত করা হয়নি</p>) : (
+          {loading ? (<p className="text-center text-slate-500 py-4">লোড হচ্ছে...</p>) : marketItems.length === 0 ? (<p className="text-center text-slate-400 py-4">এই মাসে কোনো বাজার করা হয়নি</p>) : (
             marketItems.map((item) => (
               <div key={item.id} className="bg-white p-3 rounded-xl border flex justify-between items-center shadow-sm">
                 {editingId === item.id ? (
@@ -440,7 +440,7 @@ export default function App() {
       {shareOpen && (
         <div className="absolute inset-0 bg-black/40 flex items-end sm:items-center justify-center p-4 z-50">
           <div className="w-full max-w-[420px] bg-white rounded-2xl p-4 shadow-2xl">
-            <p className="font-bold text-slate-800 mb-2">বাজার যোগ হয়েছে — শেয়ার করবেন?</p>
+            <p className="font-bold text-slate-800 mb-2">বাজার করা হয়েছে — শেয়ার করবেন?</p>
             <textarea readOnly value={shareText} className="w-full h-32 bg-slate-50 border rounded-xl p-3 text-sm focus:outline-none" />
             <div className="flex gap-2 mt-3">
               <button onClick={() => { window.open(makeWhatsAppShareUrl(shareText), "_blank"); setShareOpen(false); }} className="flex-1 bg-green-600 text-white font-bold py-3 rounded-xl">WhatsApp-এ শেয়ার</button>
@@ -469,7 +469,7 @@ export default function App() {
 
   const renderMembers = () => (
     <div className="h-full flex flex-col bg-slate-50">
-      {renderHeader("বাসার সদস্য")}
+      {renderHeader("বাসার সদস্যগণ")}
       <div className="p-4 grid gap-3">
         {MEMBERS.map((m, i) => (
           <div key={i} className="bg-white p-3 rounded-xl border border-slate-200 flex justify-between items-center shadow-sm"><div className="flex items-center gap-3"><MemberAvatar src={m.img} alt={m.name} sizeClass="w-12 h-12" /><span className="font-bold text-slate-800 text-lg">{m.name}</span></div><a href={`tel:${m.phone}`} className="bg-green-100 text-green-700 p-3 rounded-xl hover:bg-green-200 transition"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" /></svg></a></div>
