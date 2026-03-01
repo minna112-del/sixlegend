@@ -21,7 +21,7 @@ const WHATSAPP_GROUP_INVITE_URL = "https://chat.whatsapp.com/C8dEbHfrmKfERqSGDxr
 
 // বাধ্যতামূলক খরচ (জনপ্রতি)
 const FIXED_EXPENSES = { rent: 483.33, electricity: 30, wifi: 14 };
-const WIFI_EXEMPT_NAME = "মাওলানা আবদুল সাত্তার";
+const WIFI_EXEMPT_NAME = "মান্না";
 
 // ================= ICONS (Inline SVGs) =================
 const DollarIcon = () => (<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>);
@@ -40,12 +40,12 @@ const getImageUrl = (filename) => {
 
 // ================= MEMBERS =================
 const MEMBERS = [
-  { id: "m1", name: "শায়েখ সাহাব উদ্দিন", img: getImageUrl("সাহাব উদ্দিন.jpeg"), phone: "16892532453" },
-  { id: "m2", name: "হাফেজ মহসিন", img: getImageUrl("মহসিন.jpeg"), phone: "15165858019" },
-  { id: "m3", name: "মাওলানা রায়হান", img: getImageUrl("রায়হান মির্জা.jpeg"), phone: "19294939307" },
-  { id: "m4", name: "মাওলানা আবদুল সাত্তার", img: getImageUrl("আবদুল সাত্তার.jpeg"), phone: "19294754697" },
-  { id: "m5", name: "আলহাজ্ব বাপ্পি মোল্লা", img: getImageUrl("বাদশা.jpeg"), phone: "12137609654" },
-  { id: "m6", name: "মাওলানা ইমরান", img: getImageUrl("ইমরান ভুঁইয়া.png"), phone: "13479571836" },
+  { id: "m1", name: "সাহাব উদ্দিন", img: getImageUrl("সাহাব উদ্দিন.jpeg"), phone: "16892532453" },
+  { id: "m2", name: "মহসিন", img: getImageUrl("মহসিন.jpeg"), phone: "15165858019" },
+  { id: "m3", name: "রায়হান", img: getImageUrl("রায়হান মির্জা.jpeg"), phone: "19294939307" },
+  { id: "m4", name: "মান্না", img: getImageUrl("আবদুল সাত্তার.jpeg"), phone: "19294754697" },
+  { id: "m5", name: "বাপ্পি", img: getImageUrl("বাদশা.jpeg"), phone: "12137609654" },
+  { id: "m6", name: "ইমরান", img: getImageUrl("ইমরান ভুঁইয়া.png"), phone: "13479571836" },
 ];
 const memberNamesOnly = MEMBERS.map((m) => m.name);
 
@@ -300,7 +300,7 @@ export default function App() {
 
   const renderHome = () => (
     <div className="flex flex-col h-full bg-[#f4f1f8]">
-      <div className="bg-[#1e3a8a] text-center py-5 shadow-md z-10"><h1 className="text-yellow-400 text-3xl font-black mb-1 tracking-wider">লিল্লাহি এতিমখানা</h1><h2 className="text-white text-xl font-bold">دار أيتام ليلاه</h2></div>
+      <div className="bg-[#1e3a8a] text-center py-5 shadow-md z-10"><h1 className="text-yellow-400 text-3xl font-black mb-1 tracking-wider">⭐বাসা নাম্বার - 112⭐</h1><h2 className="text-white text-xl font-bold">دار أيتام ليلاه</h2></div>
       <div className="flex-1 p-4 flex flex-col justify-center">
         <div className="grid grid-cols-2 gap-4 mb-8">
           <button onClick={() => setActiveTab("cook")} className="bg-[#ebdff0]/50 hover:bg-[#e9d5f3] transition p-6 rounded-2xl border border-purple-100 flex flex-col items-center justify-center gap-3 shadow-sm"><div className="w-14 h-14 bg-orange-100 rounded-full flex items-center justify-center shadow-inner"><DollarIcon /></div><p className="font-extrabold text-[#1e1b4b] text-sm">রান্নার সময়সূচি</p></button>
@@ -324,7 +324,7 @@ export default function App() {
 
   const renderAccounts = () => (
     <div className="h-full flex flex-col bg-slate-50">
-      {renderHeader("আয়-ব্যয়ের হিসাব")}
+      {renderHeader("হিসাব")}
       <div className="p-4 space-y-4 overflow-y-auto pb-24">
         
         {/* Month selector */}
@@ -360,11 +360,11 @@ export default function App() {
                 <div key={name} className="bg-slate-50 p-3 rounded-xl border border-slate-200">
                   <p className="font-bold text-slate-800 mb-2">{name}</p>
                   <div className="grid grid-cols-3 gap-2 text-xs">
-                    <div><p className="text-slate-500">খরচ করেছেন</p><p className="font-bold text-blue-600">${convertToBanglaNumber(spent)}</p></div>
-                    <div><p className="text-slate-500">দিতে হবে</p><p className="font-bold text-orange-600">${convertToBanglaNumber(shouldPay)}</p></div>
+                    <div><p className="text-slate-500">বাজার করেছেন</p><p className="font-bold text-blue-600">${convertToBanglaNumber(spent)}</p></div>
+                    <div><p className="text-slate-500">বকেয়া</p><p className="font-bold text-orange-600">${convertToBanglaNumber(shouldPay)}</p></div>
                     <div>
                       {balance > 0 && <p className="text-green-600 font-semibold">পাওনা</p>}
-                      {balance < 0 && <p className="text-red-600 font-semibold">দেনা</p>}
+                      {balance < 0 && <p className="text-red-600 font-semibold">বকেয়া</p>}
                       {balance === 0 && <p className="text-slate-500 font-semibold">সমান</p>}
                       <p className={`font-black text-sm ${balance > 0 ? "text-green-700" : balance < 0 ? "text-red-700" : "text-slate-600"}`}>${convertToBanglaNumber(Math.abs(balance))}</p>
                     </div>
@@ -377,7 +377,7 @@ export default function App() {
 
         {/* Add expense */}
         <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
-          <h3 className="text-lg font-bold mb-3 text-slate-800">নতুন খরচ যুক্ত করুন</h3>
+          <h3 className="text-lg font-bold mb-3 text-slate-800">নতুন বাজার যুক্ত করুন</h3>
           <form onSubmit={handleAddExpense} className="space-y-3">
             <input type="text" placeholder="পণ্যের নাম" className="w-full bg-slate-50 border p-3 rounded-xl focus:outline-none focus:border-blue-500" value={newItemText} onChange={(e) => setNewItemText(e.target.value)} required />
             <div className="flex gap-2">
@@ -469,7 +469,7 @@ export default function App() {
 
   const renderMembers = () => (
     <div className="h-full flex flex-col bg-slate-50">
-      {renderHeader("শায়েখ বৃন্দ")}
+      {renderHeader("বাসার সদস্য")}
       <div className="p-4 grid gap-3">
         {MEMBERS.map((m, i) => (
           <div key={i} className="bg-white p-3 rounded-xl border border-slate-200 flex justify-between items-center shadow-sm"><div className="flex items-center gap-3"><MemberAvatar src={m.img} alt={m.name} sizeClass="w-12 h-12" /><span className="font-bold text-slate-800 text-lg">{m.name}</span></div><a href={`tel:${m.phone}`} className="bg-green-100 text-green-700 p-3 rounded-xl hover:bg-green-200 transition"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" /></svg></a></div>
