@@ -298,11 +298,12 @@ export default function App() {
     </div>
   );
 
-  const renderHome = () => (
+    const renderHome = () => (
     <div className="flex flex-col h-full bg-[#f4f1f8]">
-      <div className="bg-[#1e3a8a] text-center py-5 shadow-md z-10"><h1 className="text-yellow-400 text-3xl font-black mb-1 tracking-wider">⭐হিসাবের খাতা⭐</h1><<p className="text-white/90 text-sm font-semibold">
-  Crafted by Mahsin
-</p>
+      <div className="bg-[#1e3a8a] text-center py-5 shadow-md z-10">
+        <h1 className="text-yellow-400 text-3xl font-black mb-1 tracking-wider">⭐হিসাবের খাতা⭐</h1>
+        <p className="text-white/90 text-sm font-semibold">Crafted by Mahsin</p>
+      </div>
       <div className="flex-1 p-4 flex flex-col justify-center">
         <div className="grid grid-cols-2 gap-4 mb-8">
           <button onClick={() => setActiveTab("cook")} className="bg-[#ebdff0]/50 hover:bg-[#e9d5f3] transition p-6 rounded-2xl border border-purple-100 flex flex-col items-center justify-center gap-3 shadow-sm"><div className="w-14 h-14 bg-orange-100 rounded-full flex items-center justify-center shadow-inner"><DollarIcon /></div><p className="font-extrabold text-[#1e1b4b] text-sm">রান্নার সময়সূচি</p></button>
