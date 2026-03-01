@@ -20,7 +20,7 @@ const PIN_STORAGE_KEY = "lillahi_pin_ok_v1";
 const WHATSAPP_GROUP_INVITE_URL = "https://chat.whatsapp.com/C8dEbHfrmKfERqSGDxreuK";
 
 // বাধ্যতামূলক খরচ (জনপ্রতি)
-const FIXED_EXPENSES = { rent: 483.33, electricity: 30, wifi: 14 };
+const FIXED_EXPENSES = { rent: 483.333, electricity: 30, wifi: 14 };
 const WIFI_EXEMPT_NAME = "মান্না";
 
 // ================= ICONS (Inline SVGs) =================
@@ -301,19 +301,19 @@ export default function App() {
     const renderHome = () => (
     <div className="flex flex-col h-full bg-[#f4f1f8]">
       <div className="bg-[#1e3a8a] text-center py-5 shadow-md z-10">
-        <h1 className="text-yellow-400 text-3xl font-black mb-1 tracking-wider">⭐হিসাবের খাতা⭐</h1>
-        <p className="text-white/90 text-sm font-semibold">Crafted by Mahsin</p>
+        <h1 className="text-yellow-400 text-3xl font-black mb-1 tracking-wider">⭐দৈনন্দিন হিসাবের খাতা⭐</h1>
+        <p className="text-red/85 text-sm font-semibold">Crafted by Mahsin</p>
       </div>
       <div className="flex-1 p-4 flex flex-col justify-center">
         <div className="grid grid-cols-2 gap-4 mb-8">
-          <button onClick={() => setActiveTab("cook")} className="bg-[#ebdff0]/50 hover:bg-[#e9d5f3] transition p-6 rounded-2xl border border-purple-100 flex flex-col items-center justify-center gap-3 shadow-sm"><div className="w-14 h-14 bg-orange-100 rounded-full flex items-center justify-center shadow-inner"><DollarIcon /></div><p className="font-extrabold text-[#1e1b4b] text-sm">রান্নার সময়সূচি</p></button>
-          <button onClick={() => setActiveTab("clean")} className="bg-[#ebdff0]/50 hover:bg-[#e9d5f3] transition p-6 rounded-2xl border border-purple-100 flex flex-col items-center justify-center gap-3 shadow-sm"><div className="w-14 h-14 bg-teal-100 rounded-full flex items-center justify-center shadow-inner"><ClockIcon /></div><p className="font-extrabold text-[#1e1b4b] text-sm">বাসা পরিষ্কার</p></button>
-          <button onClick={() => setActiveTab("members")} className="bg-[#ebdff0]/50 hover:bg-[#e9d5f3] transition p-6 rounded-2xl border border-purple-100 flex flex-col items-center justify-center gap-3 shadow-sm"><div className="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center shadow-inner"><UsersIcon /></div><p className="font-extrabold text-[#1e1b4b] text-sm">বাসার সদস্যগণ</p></button>
-          <button onClick={() => setActiveTab("accounts")} className="bg-[#ebdff0]/50 hover:bg-[#e9d5f3] transition p-6 rounded-2xl border border-purple-100 flex flex-col items-center justify-center gap-3 shadow-sm"><div className="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center shadow-inner"><CartIcon /></div><p className="font-extrabold text-[#1e1b4b] text-sm">হিসাব</p></button>
+          <button onClick={() => setActiveTab("cook")} className="bg-[#ebdff0]/50 hover:bg-[#e9d5f3] transition p-6 rounded-2xl border border-purple-100 flex flex-col items-center justify-center gap-3 shadow-sm"><div className="w-14 h-14 bg-orange-100 rounded-full flex items-center justify-center shadow-inner"><CookingIcon /></div><p className="font-extrabold text-[#1e1b4b] text-sm">রান্নার সময়সূচি</p></button>
+          <button onClick={() => setActiveTab("clean")} className="bg-[#ebdff0]/50 hover:bg-[#e9d5f3] transition p-6 rounded-2xl border border-purple-100 flex flex-col items-center justify-center gap-3 shadow-sm"><div className="w-14 h-14 bg-teal-100 rounded-full flex items-center justify-center shadow-inner"><CleanerIcon /></div><p className="font-extrabold text-[#1e1b4b] text-sm">পরিষ্কারের সময়সূচি</p></button>
+          <button onClick={() => setActiveTab("members")} className="bg-[#ebdff0]/50 hover:bg-[#e9d5f3] transition p-6 rounded-2xl border border-purple-100 flex flex-col items-center justify-center gap-3 shadow-sm"><div className="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center shadow-inner"><ManIcon /></div><p className="font-extrabold text-[#1e1b4b] text-sm">সকল সদস্য</p></button>
+          <button onClick={() => setActiveTab("accounts")} className="bg-[#ebdff0]/50 hover:bg-[#e9d5f3] transition p-6 rounded-2xl border border-purple-100 flex flex-col items-center justify-center gap-3 shadow-sm"><div className="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center shadow-inner"><groceryIcon /></div><p className="font-extrabold text-[#1e1b4b] text-sm">হিসাব</p></button>
         </div>
         <div className="grid grid-cols-2 gap-4 mb-6">
-          <div className="bg-white rounded-xl py-3 px-2 text-center shadow-sm border border-red-100 flex flex-col items-center"><MemberAvatar src={MEMBERS[getCookIndex(today)]?.img} alt="Cook" sizeClass="w-10 h-10 mb-2" /><p className="text-red-500 font-semibold text-[11px] mb-0.5 uppercase tracking-wide">আজকের শেফ</p><p className="text-red-700 font-bold text-sm leading-tight">{memberNamesOnly[getCookIndex(today)]}</p></div>
-          <div className="bg-white rounded-xl py-3 px-2 text-center shadow-sm border border-pink-100 flex flex-col items-center"><MemberAvatar src={MEMBERS[getCleanerIndex(today)]?.img} alt="Cleaner" sizeClass="w-10 h-10 mb-2" /><p className="text-pink-400 font-semibold text-[11px] mb-0.5 uppercase tracking-wide">আজকের ক্লিনার</p><p className="text-pink-600 font-bold text-sm leading-tight">{memberNamesOnly[getCleanerIndex(today)]}</p></div>
+          <div className="bg-white rounded-xl py-3 px-2 text-center shadow-sm border border-red-100 flex flex-col items-center"><MemberAvatar src={MEMBERS[getCookIndex(today)]?.img} alt="Cook" sizeClass="w-10 h-10 mb-2" /><p className="text-red-500 font-semibold text-[11px] mb-0.5 uppercase tracking-wide">আজকে রান্না করবেন</p><p className="text-red-700 font-bold text-sm leading-tight">{memberNamesOnly[getCookIndex(today)]}</p></div>
+          <div className="bg-white rounded-xl py-3 px-2 text-center shadow-sm border border-pink-100 flex flex-col items-center"><MemberAvatar src={MEMBERS[getCleanerIndex(today)]?.img} alt="Cleaner" sizeClass="w-10 h-10 mb-2" /><p className="text-pink-400 font-semibold text-[11px] mb-0.5 uppercase tracking-wide">আজকে ক্লিন করবেন</p><p className="text-pink-600 font-bold text-sm leading-tight">{memberNamesOnly[getCleanerIndex(today)]}</p></div>
         </div>
       </div>
       <div className="bg-[#0b216b] p-4 text-white pb-safe mt-auto">
@@ -400,7 +400,7 @@ export default function App() {
 
         {/* List */}
         <div className="space-y-2">
-          <h3 className="text-lg font-bold text-slate-800 mb-2">বাজার লিস্ট</h3>
+          <h3 className="text-lg font-bold text-slate-800 mb-2">বাজার তালিকা</h3>
           {loading ? (<p className="text-center text-slate-500 py-4">লোড হচ্ছে...</p>) : marketItems.length === 0 ? (<p className="text-center text-slate-400 py-4">এই মাসে কোনো বাজার করা হয়নি</p>) : (
             marketItems.map((item) => (
               <div key={item.id} className="bg-white p-3 rounded-xl border flex justify-between items-center shadow-sm">
@@ -472,7 +472,7 @@ export default function App() {
 
   const renderMembers = () => (
     <div className="h-full flex flex-col bg-slate-50">
-      {renderHeader("বাসার সদস্যগণ")}
+      {renderHeader("সকল সদস্য")}
       <div className="p-4 grid gap-3">
         {MEMBERS.map((m, i) => (
           <div key={i} className="bg-white p-3 rounded-xl border border-slate-200 flex justify-between items-center shadow-sm"><div className="flex items-center gap-3"><MemberAvatar src={m.img} alt={m.name} sizeClass="w-12 h-12" /><span className="font-bold text-slate-800 text-lg">{m.name}</span></div><a href={`tel:${m.phone}`} className="bg-green-100 text-green-700 p-3 rounded-xl hover:bg-green-200 transition"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" /></svg></a></div>
