@@ -347,4 +347,142 @@ export default function App() {
             <div><p className="text-blue-200 text-xs mb-1">বিদ্যুৎ বিল</p><p className="font-black text-lg">${convertToBanglaNumber(totalElectricity)}</p></div>
             <div><p className="text-blue-200 text-xs mb-1">ওয়াইফাই বিল</p><p className="font-black text-lg">${convertToBanglaNumber(totalWifi)}</p></div>
           </div>
-          <div className="mt-4 pt-3 border-t border-white/30"><p className="text-yellow-300 text-sm mb-1">মোট খর
+          <div className="mt-4 pt-3 border-t border-white/30"><p className="text-yellow-300 text-sm mb-1">মোট খরচ</p><p className="font-black text-3xl text-yellow-400">${convertToBanglaNumber(grandTotal)}</p></div>
+        </div>
+
+        {/* Per member */}
+        <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
+          <h3 className="text-lg font-bold mb-3 text-slate-800 border-b pb-2">প্রত্যেকের হিসাব</h3>
+          <div className="space-y-2">
+            {memberNamesOnly.map((name) => {
+              const spent = memberSpending[name]; const shouldPay = perPersonTotal[name]; const balance = balances[name];
+              return (
+                <div key={name} className="bg-slate-50 p-3 rounded-xl border border-slate-200">
+                  <p className="font-bold text-slate-800 mb-2">{name}</p>
+                  <div className="grid grid-cols-3 gap-2 text-xs">
+                    <div><p className="text-slate-500">খরচ করেছেন</p><p className="font-bold text-blue-600">${convertToBanglaNumber(spent)}</p></div>
+                    <div><p className="text-slate-500">দিতে হবে</p><p className="font-bold text-orange-600">${convertToBanglaNumber(shouldPay)}</p></div>
+                    <div>
+                      {balance > 0 && <p className="text-green-600 font-semibold">পাওনা</p>}
+                      {balance < 0 && <p className="text-red-600 font-semibold">দেনা</p>}
+                      {balance === 0 && <p className="text-slate-500 font-semibold">সমান</p>}
+                      <p className={`font-black text-sm ${balance > 0 ? "text-green-700" : balance < 0 ? "text-red-700" : "text-slate-600"}`}>${convertToBanglaNumber(Math.abs(balance))}</p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Add expense */}
+        <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
+          <h3 className="text-lg font-bold mb-3 text-slate-800">নতুন খরচ যুক্ত করুন</h3>
+          <form onSubmit={handleAddExpense} className="space-y-3">
+            <input type="text" placeholder="পণ্যের নাম" className="w-full bg-slate-50 border p-3 rounded-xl focus:outline-none focus:border-blue-500" value={newItemText} onChange={(e) => setNewItemText(e.target.value)} required />
+            <div className="flex gap-2">
+              <input type="number" step="0.01" placeholder="পরিমাণ ($)" className="w-1/3 bg-slate-50 border p-3 rounded-xl focus:outline-none focus:border-blue-500" value={newAmount} onChange={(e) => setNewAmount(e.target.value)} required />
+              <select className="flex-1 bg-slate-50 border p-3 rounded-xl focus:outline-none focus:border-blue-500" value={selectedBuyer} onChange={(e) => setSelectedBuyer(e.target.value)}>
+                {memberNamesOnly.map((name) => (<option key={name} value={name}>{name}</option>))}
+              </select>
+            </div>
+            {/* Date Input for adding past expenses */}
+            <div className="flex flex-col">
+              <label className="text-xs text-slate-500 font-semibold mb-1 ml-1">তারিখ নির্বাচন (গত মাসের এন্ট্রির জন্য পরিবর্তন করুন)</label>
+              <input type="date" className="w-full bg-slate-50 border p-3 rounded-xl focus:outline-none focus:border-blue-500 text-sm" value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)} required />
+            </div>
+            <button type="submit" className="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition">যুক্ত করুন</button>
+          </form>
+        </div>
+
+        {/* List */}
+        <div className="space-y-2">
+          <h3 className="text-lg font-bold text-slate-800 mb-2">বাজার লিস্ট</h3>
+          {loading ? (<p className="text-center text-slate-500 py-4">লোড হচ্ছে...</p>) : marketItems.length === 0 ? (<p className="text-center text-slate-400 py-4">এই মাসে কোনো খরচ যুক্ত করা হয়নি</p>) : (
+            marketItems.map((item) => (
+              <div key={item.id} className="bg-white p-3 rounded-xl border flex justify-between items-center shadow-sm">
+                {editingId === item.id ? (
+                  <div className="flex-1 space-y-2">
+                    <input type="text" className="w-full bg-slate-50 border p-2 rounded-lg text-sm" value={editItemText} onChange={(e) => setEditItemText(e.target.value)} />
+                    <div className="flex gap-2">
+                      <input type="number" step="0.01" className="w-1/3 bg-slate-50 border p-2 rounded-lg text-sm" value={editAmount} onChange={(e) => setEditAmount(e.target.value)} />
+                      <select className="flex-1 bg-slate-50 border p-2 rounded-lg text-sm" value={editBuyer} onChange={(e) => setEditBuyer(e.target.value)}>
+                        {memberNamesOnly.map((name) => (<option key={name} value={name}>{name}</option>))}
+                      </select>
+                    </div>
+                    {/* Date Input for Editing */}
+                    <input type="date" className="w-full bg-slate-50 border p-2 rounded-lg text-sm" value={editDate} onChange={(e) => setEditDate(e.target.value)} required />
+                    <div className="flex gap-2">
+                      <button onClick={() => handleSaveEdit(item.id)} className="flex-1 bg-green-600 text-white py-2 rounded-lg text-sm font-bold">সেভ করুন</button>
+                      <button onClick={handleCancelEdit} className="flex-1 bg-slate-400 text-white py-2 rounded-lg text-sm font-bold">বাতিল</button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <div className="flex-1">
+                      <p className="font-bold text-slate-800">{item.item}</p>
+                      <p className="text-xs text-slate-400">{new Date(item.timestamp).toLocaleDateString("bn-BD")} • <span className="text-blue-600 font-semibold">{item.buyer}</span></p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="font-black text-red-500">${convertToBanglaNumber(item.amount)}</span>
+                      <button onClick={() => handleEditExpense(item)} className="text-blue-500 p-1"><EditIcon /></button>
+                      <button onClick={() => handleDeleteExpense(item.id)} className="text-slate-400 hover:text-red-500 p-1"><TrashIcon /></button>
+                    </div>
+                  </>
+                )}
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+
+      {/* WhatsApp Share Modal */}
+      {shareOpen && (
+        <div className="absolute inset-0 bg-black/40 flex items-end sm:items-center justify-center p-4 z-50">
+          <div className="w-full max-w-[420px] bg-white rounded-2xl p-4 shadow-2xl">
+            <p className="font-bold text-slate-800 mb-2">বাজার যোগ হয়েছে — শেয়ার করবেন?</p>
+            <textarea readOnly value={shareText} className="w-full h-32 bg-slate-50 border rounded-xl p-3 text-sm focus:outline-none" />
+            <div className="flex gap-2 mt-3">
+              <button onClick={() => { window.open(makeWhatsAppShareUrl(shareText), "_blank"); setShareOpen(false); }} className="flex-1 bg-green-600 text-white font-bold py-3 rounded-xl">WhatsApp-এ শেয়ার</button>
+              <button onClick={() => setShareOpen(false)} className="flex-1 bg-slate-200 text-slate-800 font-bold py-3 rounded-xl">পরে করবো</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
+  const renderSchedule = (type) => {
+    const isCook = type === "cook";
+    const scheduleData = MEMBERS.map((m) => ({ ...m, isToday: isCook ? memberNamesOnly[getCookIndex(today)] === m.name : memberNamesOnly[getCleanerIndex(today)] === m.name }));
+    return (
+      <div className="h-full flex flex-col bg-slate-50">
+        {renderHeader(isCook ? "রান্নার সময়সূচি" : "পরিষ্কারের সময়সূচি")}
+        <div className="p-4 space-y-3">
+          {scheduleData.map((d, i) => (
+            <div key={i} className={`p-3 rounded-xl flex items-center gap-4 border shadow-sm ${d.isToday ? "bg-blue-50 border-blue-200" : "bg-white border-slate-200"}`}><MemberAvatar src={d.img} alt={d.name} sizeClass="w-12 h-12" /><div className="flex-1"><p className={`font-bold ${d.isToday ? "text-blue-800 text-lg" : "text-slate-700"}`}>{d.name}</p>{d.isToday && <p className="text-blue-600 text-xs font-bold mt-0.5">আজকের দায়িত্ব</p>}</div></div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  const renderMembers = () => (
+    <div className="h-full flex flex-col bg-slate-50">
+      {renderHeader("শায়েখ বৃন্দ")}
+      <div className="p-4 grid gap-3">
+        {MEMBERS.map((m, i) => (
+          <div key={i} className="bg-white p-3 rounded-xl border border-slate-200 flex justify-between items-center shadow-sm"><div className="flex items-center gap-3"><MemberAvatar src={m.img} alt={m.name} sizeClass="w-12 h-12" /><span className="font-bold text-slate-800 text-lg">{m.name}</span></div><a href={`tel:${m.phone}`} className="bg-green-100 text-green-700 p-3 rounded-xl hover:bg-green-200 transition"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" /></svg></a></div>
+        ))}
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="min-h-screen bg-slate-200 flex justify-center items-center">
+      <div className="w-full max-w-[400px] h-[100dvh] sm:h-[850px] bg-white sm:rounded-[3rem] sm:shadow-2xl overflow-hidden relative border-8 border-transparent">
+        {activeTab === "home" && renderHome()}{activeTab === "cook" && renderSchedule("cook")}{activeTab === "clean" && renderSchedule("clean")}{activeTab === "members" && renderMembers()}{activeTab === "accounts" && renderAccounts()}
+      </div>
+    </div>
+  );
+}
