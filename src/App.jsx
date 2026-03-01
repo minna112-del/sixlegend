@@ -21,13 +21,15 @@ const TrashIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
 );
 
+const EditIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+);
+
 const UserPlaceholderIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-400"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
 );
 
 // ================= DYNAMIC IMAGE IMPORTS =================
-// Vite-এর import.meta.glob ব্যবহার করে মেইন ফোল্ডারের ছবিগুলো লোড করা হচ্ছে
-// এটি বিল্ড টাইমে এরর দেয় না এবং ছবিগুলো ঠিকভাবে কাজ করে
 const getImageUrl = (filename) => {
   try {
     return new URL(`../${filename}`, import.meta.url).href;
@@ -47,6 +49,13 @@ const MEMBERS = [
 ];
 
 const memberNamesOnly = MEMBERS.map(m => m.name);
+
+// ================= FIXED EXPENSES (বাধ্যতামূলক খরচ) =================
+const FIXED_EXPENSES = {
+  rent: 483.33,      // বাসা ভাড়া জনপ্রতি
+  electricity: 30,   // বিদ্যুৎ বিল জনপ্রতি
+  wifi: 14           // ওয়াইফাই বিল জনপ্রতি
+};
 
 // ================= HELPER FUNCTIONS =================
 const startDate = new Date(2026, 1, 22);
@@ -93,6 +102,12 @@ export default function App() {
   const [newAmount, setNewAmount] = useState('');
   const [selectedBuyer, setSelectedBuyer] = useState(memberNamesOnly[0]);
 
+  // Edit mode states
+  const [editingId, setEditingId] = useState(null);
+  const [editItemText, setEditItemText] = useState('');
+  const [editAmount, setEditAmount] = useState('');
+  const [editBuyer, setEditBuyer] = useState('');
+
   useEffect(() => { setToday(new Date()); }, []);
   useEffect(() => { localStorage.setItem('lillahi_market_items', JSON.stringify(marketItems)); }, [marketItems]);
 
@@ -100,11 +115,15 @@ export default function App() {
     e.preventDefault();
     if (!newItemText.trim() || !newAmount) return;
     const newItem = {
-      id: Date.now().toString(), item: newItemText.trim(), amount: Number(newAmount),
-      buyer: selectedBuyer, date: new Date().toISOString()
+      id: Date.now().toString(), 
+      item: newItemText.trim(), 
+      amount: Number(newAmount),
+      buyer: selectedBuyer, 
+      date: new Date().toISOString()
     };
     setMarketItems([newItem, ...marketItems]);
-    setNewItemText(''); setNewAmount('');
+    setNewItemText(''); 
+    setNewAmount('');
   };
 
   const handleDeleteExpense = (id) => {
@@ -113,8 +132,69 @@ export default function App() {
     }
   };
 
-  const totalExpense = marketItems.reduce((sum, item) => sum + item.amount, 0);
-  const perPersonCost = MEMBERS.length > 0 ? totalExpense / MEMBERS.length : 0;
+  const handleEditExpense = (item) => {
+    setEditingId(item.id);
+    setEditItemText(item.item);
+    setEditAmount(item.amount.toString());
+    setEditBuyer(item.buyer);
+  };
+
+  const handleSaveEdit = (id) => {
+    setMarketItems(marketItems.map(item => 
+      item.id === id 
+        ? { ...item, item: editItemText, amount: Number(editAmount), buyer: editBuyer }
+        : item
+    ));
+    setEditingId(null);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingId(null);
+  };
+
+  // ================= CALCULATION LOGIC =================
+  const totalMarketExpense = marketItems.reduce((sum, item) => sum + item.amount, 0);
+  
+  // প্রত্যেকের খরচের সমষ্টি
+  const memberSpending = {};
+  memberNamesOnly.forEach(name => { memberSpending[name] = 0; });
+  marketItems.forEach(item => {
+    memberSpending[item.buyer] += item.amount;
+  });
+
+  // বাধ্যতামূলক খরচ হিসাব (প্রত্যেকের জন্য)
+  const totalMembers = MEMBERS.length;
+  const totalRent = FIXED_EXPENSES.rent * totalMembers;
+  const totalElectricity = FIXED_EXPENSES.electricity * totalMembers;
+  
+  // ওয়াইফাই বিল (মাওলানা আবদুল সাত্তার ছাড়া)
+  const wifiMembers = totalMembers - 1; // আবদুল সাত্তার বাদ
+  const totalWifi = FIXED_EXPENSES.wifi * wifiMembers;
+
+  // মোট খরচ
+  const grandTotal = totalMarketExpense + totalRent + totalElectricity + totalWifi;
+
+  // জনপ্রতি খরচ (বাজার খরচ)
+  const perPersonMarket = totalMarketExpense / totalMembers;
+
+  // জনপ্রতি মোট খরচ (বাজার + বাসা + বিদ্যুৎ + ওয়াইফাই)
+  const perPersonTotal = {};
+  memberNamesOnly.forEach(name => {
+    let total = perPersonMarket + FIXED_EXPENSES.rent + FIXED_EXPENSES.electricity;
+    // আবদুল সাত্তার ওয়াইফাই দেবেন না
+    if (name !== "মাওলানা আবদুল সাত্তার") {
+      total += FIXED_EXPENSES.wifi;
+    }
+    perPersonTotal[name] = total;
+  });
+
+  // পাওনা/দেনা হিসাব
+  const balances = {};
+  memberNamesOnly.forEach(name => {
+    const spent = memberSpending[name];
+    const shouldPay = perPersonTotal[name];
+    balances[name] = spent - shouldPay; // পজিটিভ = পাওনা, নেগেটিভ = দেনা
+  });
 
   // ================= IMAGE FALLBACK COMPONENT =================
   const MemberAvatar = ({ src, alt, sizeClass = "w-12 h-12" }) => {
@@ -155,7 +235,7 @@ export default function App() {
             <div className="w-14 h-14 bg-orange-100 rounded-full flex items-center justify-center shadow-inner">
               <DollarIcon />
             </div>
-            <p className="font-extrabold text-[#1e1b4b] text-sm">রান্নার সময়সূচি</p>
+            <p className="font-extrabold text-[#1e1b4b] text-sm">রান্নার সময়সূচি</p>
           </button>
           
           <button onClick={() => setActiveTab('clean')} className="bg-[#ebdff0]/50 hover:bg-[#e9d5f3] transition p-6 rounded-2xl border border-purple-100 flex flex-col items-center justify-center gap-3 shadow-sm">
@@ -169,14 +249,14 @@ export default function App() {
             <div className="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center shadow-inner">
               <UsersIcon />
             </div>
-            <p className="font-extrabold text-[#1e1b4b] text-sm">শায়েখ বৃন্দ</p>
+            <p className="font-extrabold text-[#1e1b4b] text-sm">শায়েখ বৃন্দ</p>
           </button>
 
           <button onClick={() => setActiveTab('accounts')} className="bg-[#ebdff0]/50 hover:bg-[#e9d5f3] transition p-6 rounded-2xl border border-purple-100 flex flex-col items-center justify-center gap-3 shadow-sm">
             <div className="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center shadow-inner">
               <CartIcon />
             </div>
-            <p className="font-extrabold text-[#1e1b4b] text-sm">আয়-ব্যয়ের হিসাব</p>
+            <p className="font-extrabold text-[#1e1b4b] text-sm">আয়-ব্যয়ের হিসাব</p>
           </button>
         </div>
 
@@ -200,11 +280,11 @@ export default function App() {
         <div className="grid grid-cols-2 gap-4">
           <div className="bg-[#1e3a8a] rounded-xl py-4 text-center border border-blue-800 shadow-inner">
             <p className="text-lg font-bold mb-1 text-blue-100">বাজারের হিসাব</p>
-            <p className="text-red-400 text-2xl font-black">${convertToBanglaNumber(totalExpense)}</p>
+            <p className="text-red-400 text-2xl font-black">${convertToBanglaNumber(totalMarketExpense)}</p>
           </div>
           <div className="bg-[#1e3a8a] rounded-xl py-4 text-center border border-blue-800 shadow-inner">
-            <p className="text-lg font-bold mb-1 text-blue-100">জন প্রতি খরচ</p>
-            <p className="text-red-400 text-2xl font-black">${convertToBanglaNumber(perPersonCost)}</p>
+            <p className="text-lg font-bold mb-1 text-blue-100">মোট খরচ</p>
+            <p className="text-red-400 text-2xl font-black">${convertToBanglaNumber(grandTotal)}</p>
           </div>
         </div>
       </div>
@@ -223,25 +303,182 @@ export default function App() {
 
   const renderAccounts = () => (
     <div className="h-full flex flex-col bg-slate-50">
-      {renderHeader("আয়-ব্যয়ের হিসাব")}
-      <div className="p-4 space-y-4 overflow-y-auto">
+      {renderHeader("আয়-ব্যয়ের হিসাব")}
+      <div className="p-4 space-y-4 overflow-y-auto pb-24">
+        
+        {/* মোট খরচ সামারি */}
+        <div className="bg-gradient-to-br from-blue-600 to-blue-800 p-5 rounded-2xl shadow-lg text-white">
+          <h3 className="text-lg font-bold mb-3 border-b border-white/30 pb-2">সম্পূর্ণ হিসাব</h3>
+          <div className="grid grid-cols-2 gap-3 text-sm">
+            <div>
+              <p className="text-blue-200 text-xs mb-1">বাজার খরচ</p>
+              <p className="font-black text-lg">${convertToBanglaNumber(totalMarketExpense)}</p>
+            </div>
+            <div>
+              <p className="text-blue-200 text-xs mb-1">বাসা ভাড়া</p>
+              <p className="font-black text-lg">${convertToBanglaNumber(totalRent)}</p>
+            </div>
+            <div>
+              <p className="text-blue-200 text-xs mb-1">বিদ্যুৎ বিল</p>
+              <p className="font-black text-lg">${convertToBanglaNumber(totalElectricity)}</p>
+            </div>
+            <div>
+              <p className="text-blue-200 text-xs mb-1">ওয়াইফাই বিল</p>
+              <p className="font-black text-lg">${convertToBanglaNumber(totalWifi)}</p>
+            </div>
+          </div>
+          <div className="mt-4 pt-3 border-t border-white/30">
+            <p className="text-yellow-300 text-sm mb-1">মোট খরচ</p>
+            <p className="font-black text-3xl text-yellow-400">${convertToBanglaNumber(grandTotal)}</p>
+          </div>
+        </div>
+
+        {/* প্রত্যেকের হিসাব */}
         <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
+          <h3 className="text-lg font-bold mb-3 text-slate-800 border-b pb-2">প্রত্যেকের হিসাব</h3>
+          <div className="space-y-2">
+            {memberNamesOnly.map((name) => {
+              const spent = memberSpending[name];
+              const shouldPay = perPersonTotal[name];
+              const balance = balances[name];
+              const isPaona = balance > 0;
+              const isDena = balance < 0;
+
+              return (
+                <div key={name} className="bg-slate-50 p-3 rounded-xl border border-slate-200">
+                  <p className="font-bold text-slate-800 mb-2">{name}</p>
+                  <div className="grid grid-cols-3 gap-2 text-xs">
+                    <div>
+                      <p className="text-slate-500">খরচ করেছেন</p>
+                      <p className="font-bold text-blue-600">${convertToBanglaNumber(spent)}</p>
+                    </div>
+                    <div>
+                      <p className="text-slate-500">দিতে হবে</p>
+                      <p className="font-bold text-orange-600">${convertToBanglaNumber(shouldPay)}</p>
+                    </div>
+                    <div>
+                      {isPaona && <p className="text-green-600 font-semibold">পাওনা</p>}
+                      {isDena && <p className="text-red-600 font-semibold">দেনা</p>}
+                      {balance === 0 && <p className="text-slate-500 font-semibold">সমান</p>}
+                      <p className={`font-black text-sm ${isPaona ? 'text-green-700' : isDena ? 'text-red-700' : 'text-slate-600'}`}>
+                        ${convertToBanglaNumber(Math.abs(balance))}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* নতুন খরচ যুক্ত করুন */}
+        <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
+          <h3 className="text-lg font-bold mb-3 text-slate-800">নতুন খরচ যুক্ত করুন</h3>
           <form onSubmit={handleAddExpense} className="space-y-3">
-            <input type="text" placeholder="পণ্যের নাম" className="w-full bg-slate-50 border p-3 rounded-xl focus:outline-none focus:border-blue-500" value={newItemText} onChange={(e)=>setNewItemText(e.target.value)} required />
+            <input 
+              type="text" 
+              placeholder="পণ্যের নাম" 
+              className="w-full bg-slate-50 border p-3 rounded-xl focus:outline-none focus:border-blue-500" 
+              value={newItemText} 
+              onChange={(e)=>setNewItemText(e.target.value)} 
+              required 
+            />
             <div className="flex gap-2">
-              <input type="number" placeholder="পরিমাণ ($)" className="w-1/3 bg-slate-50 border p-3 rounded-xl focus:outline-none focus:border-blue-500" value={newAmount} onChange={(e)=>setNewAmount(e.target.value)} required />
-              <select className="flex-1 bg-slate-50 border p-3 rounded-xl focus:outline-none focus:border-blue-500" value={selectedBuyer} onChange={(e)=>setSelectedBuyer(e.target.value)}>
+              <input 
+                type="number" 
+                step="0.01"
+                placeholder="পরিমাণ ($)" 
+                className="w-1/3 bg-slate-50 border p-3 rounded-xl focus:outline-none focus:border-blue-500" 
+                value={newAmount} 
+                onChange={(e)=>setNewAmount(e.target.value)} 
+                required 
+              />
+              <select 
+                className="flex-1 bg-slate-50 border p-3 rounded-xl focus:outline-none focus:border-blue-500" 
+                value={selectedBuyer} 
+                onChange={(e)=>setSelectedBuyer(e.target.value)}
+              >
                 {memberNamesOnly.map(name => <option key={name} value={name}>{name}</option>)}
               </select>
             </div>
-            <button type="submit" className="w-full bg-blue-600 text-white font-bold py-3 rounded-xl">যুক্ত করুন</button>
+            <button type="submit" className="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition">যুক্ত করুন</button>
           </form>
         </div>
-        <div className="space-y-2 pb-20">
+
+        {/* বাজার লিস্ট */}
+        <div className="space-y-2">
+          <h3 className="text-lg font-bold text-slate-800 mb-2">বাজার লিস্ট</h3>
+          {marketItems.length === 0 && (
+            <div className="bg-white p-6 rounded-xl text-center text-slate-400">
+              <p>এখনও কোনো খরচ যুক্ত করা হয়নি</p>
+            </div>
+          )}
           {marketItems.map(item => (
             <div key={item.id} className="bg-white p-3 rounded-xl border flex justify-between items-center shadow-sm">
-              <div><p className="font-bold text-slate-800">{item.item}</p><p className="text-xs text-blue-600 font-semibold">{item.buyer}</p></div>
-              <div className="flex items-center gap-3"><span className="font-black text-red-500">${convertToBanglaNumber(item.amount)}</span><button onClick={()=>handleDeleteExpense(item.id)} className="text-slate-400 hover:text-red-500"><TrashIcon /></button></div>
+              {editingId === item.id ? (
+                // Edit Mode
+                <div className="flex-1 space-y-2">
+                  <input 
+                    type="text" 
+                    className="w-full bg-slate-50 border p-2 rounded-lg text-sm" 
+                    value={editItemText} 
+                    onChange={(e) => setEditItemText(e.target.value)} 
+                  />
+                  <div className="flex gap-2">
+                    <input 
+                      type="number" 
+                      step="0.01"
+                      className="w-1/3 bg-slate-50 border p-2 rounded-lg text-sm" 
+                      value={editAmount} 
+                      onChange={(e) => setEditAmount(e.target.value)} 
+                    />
+                    <select 
+                      className="flex-1 bg-slate-50 border p-2 rounded-lg text-sm" 
+                      value={editBuyer} 
+                      onChange={(e) => setEditBuyer(e.target.value)}
+                    >
+                      {memberNamesOnly.map(name => <option key={name} value={name}>{name}</option>)}
+                    </select>
+                  </div>
+                  <div className="flex gap-2">
+                    <button 
+                      onClick={() => handleSaveEdit(item.id)} 
+                      className="flex-1 bg-green-600 text-white py-2 rounded-lg text-sm font-bold"
+                    >
+                      সেভ করুন
+                    </button>
+                    <button 
+                      onClick={handleCancelEdit} 
+                      className="flex-1 bg-slate-400 text-white py-2 rounded-lg text-sm font-bold"
+                    >
+                      বাতিল
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                // View Mode
+                <>
+                  <div>
+                    <p className="font-bold text-slate-800">{item.item}</p>
+                    <p className="text-xs text-blue-600 font-semibold">{item.buyer}</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="font-black text-red-500">${convertToBanglaNumber(item.amount)}</span>
+                    <button 
+                      onClick={() => handleEditExpense(item)} 
+                      className="text-blue-500 hover:text-blue-700 p-1"
+                    >
+                      <EditIcon />
+                    </button>
+                    <button 
+                      onClick={() => handleDeleteExpense(item.id)} 
+                      className="text-slate-400 hover:text-red-500 p-1"
+                    >
+                      <TrashIcon />
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
           ))}
         </div>
@@ -258,14 +495,14 @@ export default function App() {
 
     return (
       <div className="h-full flex flex-col bg-slate-50">
-        {renderHeader(isCook ? "রান্নার সময়সূচি" : "পরিষ্কারের সময়সূচি")}
+        {renderHeader(isCook ? "রান্নার সময়সূচি" : "পরিষ্কারের সময়সূচি")}
         <div className="p-4 space-y-3">
           {scheduleData.map((d, i) => (
             <div key={i} className={`p-3 rounded-xl flex items-center gap-4 border shadow-sm ${d.isToday ? 'bg-blue-50 border-blue-200' : 'bg-white border-slate-200'}`}>
               <MemberAvatar src={d.img} alt={d.name} sizeClass="w-12 h-12" />
               <div className="flex-1">
                 <p className={`font-bold ${d.isToday ? 'text-blue-800 text-lg' : 'text-slate-700'}`}>{d.name}</p>
-                {d.isToday && <p className="text-blue-600 text-xs font-bold mt-0.5">আজকের দায়িত্ব</p>}
+                {d.isToday && <p className="text-blue-600 text-xs font-bold mt-0.5">আজকের দায়িত্ব</p>}
               </div>
             </div>
           ))}
@@ -276,7 +513,7 @@ export default function App() {
 
   const renderMembers = () => (
     <div className="h-full flex flex-col bg-slate-50">
-      {renderHeader("শায়েখ বৃন্দ")}
+      {renderHeader("শায়েখ বৃন্দ")}
       <div className="p-4 grid gap-3">
         {MEMBERS.map((m, i) => (
           <div key={i} className="bg-white p-3 rounded-xl border border-slate-200 flex justify-between items-center shadow-sm">
@@ -284,7 +521,9 @@ export default function App() {
               <MemberAvatar src={m.img} alt={m.name} sizeClass="w-12 h-12" />
               <span className="font-bold text-slate-800 text-lg">{m.name}</span>
             </div>
-            <a href={`tel:${m.phone}`} className="bg-green-100 text-green-700 p-3 rounded-xl hover:bg-green-200 transition"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg></a>
+            <a href={`tel:${m.phone}`} className="bg-green-100 text-green-700 p-3 rounded-xl hover:bg-green-200 transition">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            </a>
           </div>
         ))}
       </div>
