@@ -364,7 +364,7 @@ export default function App() {
                   <p className="font-bold text-slate-800 mb-2">{name}</p>
                   <div className="grid grid-cols-3 gap-2 text-xs">
                     <div><p className="text-slate-500">বাজার করেছেন</p><p className="font-bold text-blue-600">${convertToBanglaNumber(spent)}</p></div>
-                    <div><p className="text-slate-500">বকেয়া</p><p className="font-bold text-orange-600">${convertToBanglaNumber(shouldPay)}</p></div>
+                    <div><p className="text-slate-500">বাসা ভাড়া , বাজার ও অন্যান্য বিলসহ </p><p className="font-bold text-orange-600">${convertToBanglaNumber(shouldPay)}</p></div>
                     <div>
                       {balance > 0 && <p className="text-green-600 font-semibold">পাওনা</p>}
                       {balance < 0 && <p className="text-red-600 font-semibold">বকেয়া</p>}
