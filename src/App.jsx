@@ -2,9 +2,6 @@ import React, { useEffect, useMemo, useState } from "react";
 import {
   collection,
   addDoc,
-  deleteDoc,
-  doc,
-  updateDoc,
   onSnapshot,
   query,
   orderBy,
@@ -13,7 +10,7 @@ import {
 import { db } from "./firebase";
 
 // ================= CONFIG =================
-const APP_PIN = "7307";
+const APP_PIN = "7307"; // কোডে পিন দেওয়া আছে, কিন্তু ওয়েবসাইটের স্ক্রিনে আর দেখাবে না
 const PIN_STORAGE_KEY = "lillahi_pin_ok_v1";
 
 // ================= MEMBERS =================
@@ -36,9 +33,21 @@ const formatDateForInput = (ts) => {
   return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
 };
 
-const convertToBanglaNumber = (num) => {
-  const bn = {0:"০",1:"১",2:"২",3:"৩",4:"৪",5:"৫",6:"৬",7:"৭",8:"৮",9:"৯"};
-  return Number(num || 0).toFixed(2).replace(/[0-9]/g, m => bn[m]);
+// ================= AVATAR COMPONENT =================
+// আপনার গিটহাবের src ফোল্ডারে থাকা ছবিগুলো এখানে লোড হবে
+const MemberAvatar = ({ name }) => {
+  let src = "";
+  if (name === "মহসিন") src = new URL("./MAHSIN.jpeg", import.meta.url).href;
+  else if (name === "জিসান") src = new URL("./JISAN.jpeg", import.meta.url).href;
+
+  return (
+    <img
+      src={src}
+      alt={name}
+      className="w-16 h-16 rounded-2xl object-cover border-4 border-gray-100 shadow-sm"
+      onError={(e) => e.target.src = `https://via.placeholder.com/64?text=${name[0]}`}
+    />
+  );
 };
 
 // ================= APP =================
@@ -56,13 +65,7 @@ export default function App() {
   const [selectedBuyer, setSelectedBuyer] = useState(memberNamesOnly[0]);
   const [selectedDate, setSelectedDate] = useState(formatDateForInput(Date.now()));
 
-  const [editingId, setEditingId] = useState(null);
-  const [editItemText, setEditItemText] = useState("");
-  const [editAmount, setEditAmount] = useState("");
-  const [editBuyer, setEditBuyer] = useState("");
-  const [editDate, setEditDate] = useState("");
-
-  // Firestore
+  // Firestore Data Fetching
   useEffect(() => {
     setLoading(true);
     const [yy, mm] = monthKey.split("-").map(Number);
@@ -85,6 +88,7 @@ export default function App() {
     return unsub;
   }, [monthKey]);
 
+  // Handle PIN Unlock
   const unlock = () => {
     if (pinInput === APP_PIN) {
       localStorage.setItem(PIN_STORAGE_KEY, "1");
@@ -96,6 +100,29 @@ export default function App() {
     }
   };
 
+  // Handle Add Expense (এই ফাংশনটি না থাকার কারণেই সাদা পেজ আসতো)
+  const handleAddExpense = async (e) => {
+    e.preventDefault();
+    if (!newItemText || !newAmount) return;
+
+    try {
+      await addDoc(collection(db, "expenses"), {
+        text: newItemText,
+        amount: Number(newAmount),
+        buyer: selectedBuyer,
+        timestamp: new Date(selectedDate).getTime()
+      });
+      
+      // সফলভাবে ডাটা সেভ হওয়ার পর ইনপুট ফিল্ডগুলো খালি করে দেওয়া
+      setNewItemText("");
+      setNewAmount("");
+    } catch (error) {
+      console.error("Error adding document: ", error);
+      alert("ডাটা সেভ করতে সমস্যা হয়েছে!");
+    }
+  };
+
+  // Calculations
   const totalMarketExpense = marketItems.reduce((sum, i) => sum + Number(i.amount || 0), 0);
 
   const memberSpending = {};
@@ -122,21 +149,23 @@ export default function App() {
     return [];
   }, [balances]);
 
+  // Locked Screen UI
   if (!isUnlocked) {
     return (
       <div className="min-h-screen bg-blue-950 flex items-center justify-center p-4">
-        <div className="bg-white rounded-3xl w-full max-w-xs p-8 text-center">
-          <h1 className="text-3xl font-bold mb-6">হিসাব</h1>
+        <div className="bg-white rounded-3xl w-full max-w-xs p-8 text-center shadow-2xl">
+          <h1 className="text-4xl font-black mb-2">হিসাব</h1>
+          <p className="text-gray-600 mb-8">মহসিন ও জিসান</p>
           <input
             type="password"
             maxLength={4}
             value={pinInput}
             onChange={(e) => setPinInput(e.target.value)}
-            placeholder="7307"
-            className="w-full text-3xl text-center py-4 border-2 rounded-2xl"
+            placeholder="****" // পিনকোড হিডেন করা হয়েছে
+            className="w-full text-3xl text-center py-5 border-2 rounded-2xl focus:border-blue-600 outline-none tracking-widest"
           />
-          {pinError && <p className="text-red-500 mt-2">{pinError}</p>}
-          <button onClick={unlock} className="mt-6 w-full bg-blue-600 text-white py-4 rounded-2xl font-bold">
+          {pinError && <p className="text-red-500 mt-4 font-bold">{pinError}</p>}
+          <button onClick={unlock} className="mt-6 w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl text-lg transition">
             প্রবেশ করুন
           </button>
         </div>
@@ -144,75 +173,93 @@ export default function App() {
     );
   }
 
+  // Unlocked Main UI
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
+    <div className="min-h-screen bg-gray-100 p-5">
       <h1 className="text-3xl font-bold text-center mb-8">📊 হিসাব</h1>
 
-      {/* Total */}
-      <div className="bg-white rounded-3xl p-8 text-center shadow mb-8">
-        <p className="text-gray-500">মোট বাজার খরচ</p>
-        <p className="text-5xl font-black text-blue-600">৳{totalMarketExpense.toFixed(2)}</p>
-      </div>
+      <div className="max-w-md mx-auto space-y-6">
+        {/* Total Market Expense */}
+        <div className="bg-white rounded-3xl p-8 text-center shadow">
+          <p className="text-gray-500 font-semibold">মোট বাজার খরচ</p>
+          <p className="text-5xl font-black text-blue-600 mt-3">৳{totalMarketExpense.toFixed(2)}</p>
+        </div>
 
-      {/* Balances */}
-      <div className="space-y-4 mb-8">
-        {memberNamesOnly.map((name) => (
-          <div key={name} className="bg-white rounded-3xl p-6 shadow flex justify-between items-center">
-            <div>
-              <p className="text-xl font-semibold">{name}</p>
+        {/* Individual Balances & Avatars */}
+        <div className="space-y-4">
+          {memberNamesOnly.map((name) => (
+            <div key={name} className="bg-white rounded-3xl p-6 shadow flex items-center gap-5">
+              <MemberAvatar name={name} />
+              <div className="flex-1">
+                <p className="text-xl font-bold text-gray-800">{name}</p>
+                <p className={`text-2xl font-black mt-1 ${balances[name] >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  {balances[name] >= 0 ? '+' : '-'}৳{Math.abs(balances[name]).toFixed(2)}
+                </p>
+              </div>
             </div>
-            <p className={`text-3xl font-bold ${balances[name] >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-              ৳{balances[name].toFixed(2)}
-            </p>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
 
-      {/* Settlement */}
-      <div className="bg-white rounded-3xl p-6 shadow mb-8">
-        <h3 className="font-bold mb-4">কে কাকে কত দিবে</h3>
-        {settlements.length === 0 ? (
-          <p className="text-green-600 text-lg">🎉 সব হিসাব সমান</p>
-        ) : (
-          settlements.map((s, i) => (
-            <p key={i} className="text-lg py-2">
-              👉 <b>{s.from}</b> দিবে <b>{s.to}</b> কে <span className="text-red-600">৳{s.amount.toFixed(2)}</span>
+        {/* Settlement Logic */}
+        <div className="bg-white rounded-3xl p-6 shadow border-l-4 border-blue-500">
+          <h3 className="font-bold text-lg mb-4 text-gray-800">কে কাকে কত দিবে?</h3>
+          {settlements.length === 0 ? (
+            <p className="text-green-600 font-bold text-lg flex items-center gap-2">
+              <span>🎉</span> সব হিসাব সমান!
             </p>
-          ))
-        )}
-      </div>
+          ) : (
+            settlements.map((s, i) => (
+              <div key={i} className="bg-gray-50 p-4 rounded-2xl border border-gray-100">
+                <p className="text-lg text-gray-700">
+                  <span className="font-bold text-gray-900">{s.from}</span> দিবে <span className="font-bold text-gray-900">{s.to}</span> কে
+                </p>
+                <p className="text-2xl font-black text-red-600 mt-1">৳{s.amount.toFixed(2)}</p>
+              </div>
+            ))
+          )}
+        </div>
 
-      {/* Add Form */}
-      <div className="bg-white rounded-3xl p-6 shadow">
-        <h3 className="font-bold mb-4">নতুন খরচ যোগ করুন</h3>
-        <form onSubmit={handleAddExpense} className="space-y-4">
-          <input
-            type="text"
-            placeholder="পণ্যের নাম"
-            value={newItemText}
-            onChange={(e) => setNewItemText(e.target.value)}
-            className="w-full p-4 border rounded-2xl"
-            required
-          />
-          <div className="flex gap-3">
+        {/* Add Expense Form */}
+        <div className="bg-white rounded-3xl p-6 shadow">
+          <h3 className="font-bold text-lg mb-4 text-gray-800">নতুন খরচ যোগ করুন</h3>
+          <form onSubmit={handleAddExpense} className="space-y-4">
             <input
-              type="number"
-              step="0.01"
-              placeholder="টাকা"
-              value={newAmount}
-              onChange={(e) => setNewAmount(e.target.value)}
-              className="flex-1 p-4 border rounded-2xl"
+              type="text"
+              placeholder="পণ্যের নাম (যেমন: চাল, ডাল)"
+              value={newItemText}
+              onChange={(e) => setNewItemText(e.target.value)}
+              className="w-full p-4 border-2 border-gray-200 rounded-2xl outline-none focus:border-blue-500 transition"
               required
             />
-            <select value={selectedBuyer} onChange={(e) => setSelectedBuyer(e.target.value)} className="p-4 border rounded-2xl">
-              {memberNamesOnly.map(n => <option key={n} value={n}>{n}</option>)}
-            </select>
-          </div>
-          <input type="date" value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)} className="w-full p-4 border rounded-2xl" />
-          <button type="submit" className="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold">
-            ➕ যোগ করুন
-          </button>
-        </form>
+            <div className="flex gap-3">
+              <input
+                type="number"
+                step="0.01"
+                placeholder="টাকার পরিমাণ"
+                value={newAmount}
+                onChange={(e) => setNewAmount(e.target.value)}
+                className="flex-1 p-4 border-2 border-gray-200 rounded-2xl outline-none focus:border-blue-500 transition"
+                required
+              />
+              <select 
+                value={selectedBuyer} 
+                onChange={(e) => setSelectedBuyer(e.target.value)} 
+                className="p-4 border-2 border-gray-200 rounded-2xl bg-white outline-none focus:border-blue-500 transition font-bold"
+              >
+                {memberNamesOnly.map(n => <option key={n} value={n}>{n}</option>)}
+              </select>
+            </div>
+            <input 
+              type="date" 
+              value={selectedDate} 
+              onChange={(e) => setSelectedDate(e.target.value)} 
+              className="w-full p-4 border-2 border-gray-200 rounded-2xl outline-none focus:border-blue-500 transition text-gray-600" 
+            />
+            <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-2xl font-black text-lg transition shadow-lg mt-2">
+              ➕ যোগ করুন
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   );
