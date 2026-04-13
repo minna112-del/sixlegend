@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   collection,
   addDoc,
@@ -16,11 +16,10 @@ import { db } from "./firebase";
 import hisabImage from './hisab.jpeg';
 import mahsinImg from './MAHSIN.jpeg';
 import jisanImg from './JISAN.jpeg';
-import splashVideo from './splash_video.mp4'; // আপনার আপলোড করা ভিডিও
+import splashVideo from './splash_video.mp4'; 
 
 // ================= CONFIG =================
-const APP_PIN = "7373"; 
-// (পিন সেভ রাখার অপশন মুছে ফেলা হয়েছে)
+const APP_PIN = "7307"; 
 
 // ================= MEMBERS =================
 const MEMBERS = [
@@ -54,7 +53,6 @@ const MemberAvatar = ({ name }) => {
 
 // ================= APP =================
 export default function App() {
-  // অ্যাপ ওপেন করলেই যেন সরাসরি পিন স্ক্রিন আসে, তাই false দেওয়া হয়েছে
   const [isUnlocked, setIsUnlocked] = useState(false); 
   const [showSplash, setShowSplash] = useState(false); 
   const [pinInput, setPinInput] = useState("");
@@ -104,7 +102,7 @@ export default function App() {
       
       setTimeout(() => {
         setShowSplash(false);
-        setIsUnlocked(true); // ভিডিও শেষ হওয়ার পর শুধু অ্যাপ ওপেন হবে, পিন সেভ হবে না
+        setIsUnlocked(true); 
       }, 5000); 
 
     } else { setPinError("ভুল পিন! আবার চেষ্টা করুন"); }
@@ -118,7 +116,7 @@ export default function App() {
       setNewItemText(""); setNewAmount("");
     } catch (error) { 
       console.error(error);
-      alert("ডাটা সেভ করতে সমস্যা হয়েছে! Firebase Rules চেক করুন।"); 
+      alert("ডাটা সেভ করতে সমস্যা হয়েছে!"); 
     }
   };
 
@@ -169,9 +167,10 @@ export default function App() {
   if (showSplash) {
     return (
       <div className="fixed inset-0 z-50 bg-black flex items-center justify-center overflow-hidden">
+        {/* সাউন্ডের জন্য muted অপশনটি বাদ দেওয়া হয়েছে */}
         <video 
           src={splashVideo} 
-          autoPlay  
+          autoPlay 
           playsInline 
           className="w-full h-full object-cover"
         />
@@ -225,7 +224,6 @@ export default function App() {
             <p className="text-2xl font-black mt-1">৳{totalMarketExpense.toFixed(0)}</p>
           </div>
           
-          {/* মহসিন বক্স (ছবির জলছাপ সহ) */}
           <div className="relative bg-white rounded-3xl p-5 text-gray-800 shadow shadow-blue-100 flex flex-col items-center justify-center text-center border border-blue-50 overflow-hidden">
             <div className="absolute inset-0 opacity-[0.15] bg-cover bg-top" style={{ backgroundImage: `url(${mahsinImg})` }}></div>
             <div className="relative z-10">
@@ -234,7 +232,6 @@ export default function App() {
             </div>
           </div>
           
-          {/* জিসান বক্স (ছবির জলছাপ সহ) */}
           <div className="relative bg-white rounded-3xl p-5 text-gray-800 shadow shadow-blue-100 flex flex-col items-center justify-center text-center border border-blue-50 overflow-hidden">
             <div className="absolute inset-0 opacity-[0.15] bg-cover bg-top" style={{ backgroundImage: `url(${jisanImg})` }}></div>
             <div className="relative z-10">
@@ -249,7 +246,7 @@ export default function App() {
           </div>
         </div>
 
-        {/* Shopping List Section */}
+        {/* Shopping List Section (একক লিস্ট) */}
         <div className="bg-yellow-50/90 backdrop-blur-sm rounded-3xl p-6 shadow-md border-t-8 border-yellow-400">
           <h3 className="font-bold text-xl mb-5 text-gray-800 flex items-center gap-2">🛒 কি কি আনতে হবে?</h3>
           <form onSubmit={handleAddShoppingItem} className="flex gap-2 mb-6">
