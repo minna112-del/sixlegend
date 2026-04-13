@@ -103,7 +103,7 @@ export default function App() {
       setTimeout(() => {
         setShowSplash(false);
         setIsUnlocked(true); 
-      }, 2500); 
+      }, 3000); 
 
     } else { setPinError("ভুল পিন! আবার চেষ্টা করুন"); }
   };
