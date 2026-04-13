@@ -12,15 +12,15 @@ import {
 } from "firebase/firestore";
 import { db } from "./firebase";
 
-// ছবিগুলো ইমপোর্ট করা হলো
+// ছবি ও ভিডিও ইমপোর্ট করা হলো
 import hisabImage from './hisab.jpeg';
 import mahsinImg from './MAHSIN.jpeg';
 import jisanImg from './JISAN.jpeg';
+import splashVideo from './splash_video.mp4'; // আপনার আপলোড করা ভিডিও
 
 // ================= CONFIG =================
 const APP_PIN = "7307"; 
-const ACTION_PIN = "8019"; 
-const PIN_STORAGE_KEY = "lillahi_pin_ok_v1";
+// (পিন সেভ রাখার অপশন মুছে ফেলা হয়েছে)
 
 // ================= MEMBERS =================
 const MEMBERS = [
@@ -54,8 +54,9 @@ const MemberAvatar = ({ name }) => {
 
 // ================= APP =================
 export default function App() {
-  const [isUnlocked, setIsUnlocked] = useState(() => localStorage.getItem(PIN_STORAGE_KEY) === "1");
-  const [showSplash, setShowSplash] = useState(false); // স্প্ল্যাশ স্ক্রিনের স্টেট
+  // অ্যাপ ওপেন করলেই যেন সরাসরি পিন স্ক্রিন আসে, তাই false দেওয়া হয়েছে
+  const [isUnlocked, setIsUnlocked] = useState(false); 
+  const [showSplash, setShowSplash] = useState(false); 
   const [pinInput, setPinInput] = useState("");
   const [pinError, setPinError] = useState("");
 
@@ -94,18 +95,17 @@ export default function App() {
     return () => { unsubExpenses(); unsubShopping(); };
   }, [monthKey]);
 
-  // পিন আনলক ও ৫-সেকেন্ডের ভিডিও ইফেক্ট
+  // পিন আনলক ও স্প্ল্যাশ ভিডিও প্লেয়ার
   const unlock = () => {
     if (pinInput === APP_PIN) {
       setPinError("");
       setPinInput("");
-      setShowSplash(true); // ৫ সেকেন্ডের ইন্ট্রো চালু হবে
+      setShowSplash(true); 
       
       setTimeout(() => {
         setShowSplash(false);
-        localStorage.setItem(PIN_STORAGE_KEY, "1");
-        setIsUnlocked(true);
-      }, 5000); // ৫ সেকেন্ড পর মূল অ্যাপে যাবে
+        setIsUnlocked(true); // ভিডিও শেষ হওয়ার পর শুধু অ্যাপ ওপেন হবে, পিন সেভ হবে না
+      }, 5000); 
 
     } else { setPinError("ভুল পিন! আবার চেষ্টা করুন"); }
   };
@@ -116,7 +116,10 @@ export default function App() {
     try {
       await addDoc(collection(db, "expenses"), { text: newItemText, amount: Number(newAmount), buyer: selectedBuyer, timestamp: new Date(selectedDate).getTime() });
       setNewItemText(""); setNewAmount("");
-    } catch (error) { alert("সেভ করতে সমস্যা হয়েছে!"); }
+    } catch (error) { 
+      console.error(error);
+      alert("ডাটা সেভ করতে সমস্যা হয়েছে! Firebase Rules চেক করুন।"); 
+    }
   };
 
   const handleAddShoppingItem = async (e) => {
@@ -133,16 +136,16 @@ export default function App() {
   };
 
   const verifyActionPin = async () => {
-    if (actionPinInput === ACTION_PIN) {
-      const { type, item } = actionModal;
-      if (type === 'delete') {
+    const { type, item } = actionModal;
+    if (type === 'delete') {
+      try {
         await deleteDoc(doc(db, "expenses", item.id));
         setActionModal({ isOpen: false, type: "", item: null, error: "" });
-      } else if (type === 'edit') {
-        setEditModal({ isOpen: true, id: item.id, text: item.text, amount: item.amount, buyer: item.buyer, date: formatDateForInput(item.timestamp) });
-        setActionModal({ isOpen: false, type: "", item: null, error: "" });
-      }
-    } else { setActionModal(prev => ({ ...prev, error: "ভুল পিন!" })); }
+      } catch (error) { alert("ডিলেট করতে সমস্যা হয়েছে!"); }
+    } else if (type === 'edit') {
+      setEditModal({ isOpen: true, id: item.id, text: item.text, amount: item.amount, buyer: item.buyer, date: formatDateForInput(item.timestamp) });
+      setActionModal({ isOpen: false, type: "", item: null, error: "" });
+    }
   };
 
   const handleUpdateExpense = async (e) => {
@@ -165,33 +168,14 @@ export default function App() {
   // ================= ৫-সেকেন্ডের ভিডিও স্প্ল্যাশ স্ক্রিন =================
   if (showSplash) {
     return (
-      <div className="fixed inset-0 z-50 bg-gray-900 text-white flex flex-col items-center justify-center p-5 overflow-hidden">
-        {/* ব্যাকগ্রাউন্ড অডিও (public ফোল্ডারে music.mp3 রাখতে হবে) */}
-        <audio autoPlay src="/music.mp3" />
-        
-        <img src={mahsinImg} alt="Mahsin" className="w-36 h-36 rounded-full border-4 border-blue-500 shadow-[0_0_40px_rgba(59,130,246,0.8)] animate-pulse mb-6 object-cover object-top" />
-        
-        <h2 className="text-xl md:text-2xl font-bold tracking-[0.2em] text-blue-400 text-center mb-2 animate-bounce">DIGITAL WEB APP CREATOR</h2>
-        <h1 className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500 mb-10 tracking-widest text-center">MD MAHSIN</h1>
-        
-        <div className="space-y-4 w-full max-w-sm animate-fade-in-up">
-          <div className="flex items-center gap-4 bg-white/10 p-4 rounded-2xl backdrop-blur-sm border border-white/20">
-            <span className="text-2xl">📱</span>
-            <p className="font-bold tracking-widest">516-585-8019</p>
-          </div>
-          <div className="flex items-center gap-4 bg-white/10 p-4 rounded-2xl backdrop-blur-sm border border-white/20">
-            <span className="text-2xl">📘</span>
-            <p className="font-bold truncate">facebook.com/mahsin426</p>
-          </div>
-          <div className="flex items-center gap-4 bg-white/10 p-4 rounded-2xl backdrop-blur-sm border border-white/20">
-            <span className="text-2xl">▶️</span>
-            <p className="font-bold truncate">youtube.com/@Mahsin2.0</p>
-          </div>
-          <div className="flex items-center gap-4 bg-white/10 p-4 rounded-2xl backdrop-blur-sm border border-white/20">
-            <span className="text-2xl">📧</span>
-            <p className="font-bold truncate">mdmahsin426@gmail.com</p>
-          </div>
-        </div>
+      <div className="fixed inset-0 z-50 bg-black flex items-center justify-center overflow-hidden">
+        <video 
+          src={splashVideo} 
+          autoPlay 
+          muted 
+          playsInline 
+          className="w-full h-full object-cover"
+        />
       </div>
     );
   }
@@ -345,7 +329,7 @@ export default function App() {
       {actionModal.isOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-3xl p-6 w-full max-w-xs text-center shadow-2xl">
-            <h3 className="font-bold text-xl mb-4">পিন (8019) দিন</h3>
+            <h3 className="font-bold text-xl mb-4">সিকিউরিটি পিন দিন</h3>
             <input type="password" maxLength={4} value={actionPinInput} onChange={(e) => setActionPinInput(e.target.value)} placeholder="••••" className="w-full text-3xl text-center py-4 border-2 rounded-2xl outline-none focus:border-blue-600 tracking-widest mb-2 font-mono" />
             {actionModal.error && <p className="text-red-500 font-bold mb-4">{actionModal.error}</p>}
             <div className="flex gap-3 mt-4">
