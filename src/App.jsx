@@ -100,6 +100,7 @@ export default function App() {
       setPinInput("");
       setShowSplash(true); 
       
+      // ভিডিওর সময়কাল ৮ সেকেন্ড (8000) করে দেওয়া হলো
       setTimeout(() => {
         setShowSplash(false);
         setIsUnlocked(true); 
@@ -167,7 +168,6 @@ export default function App() {
   if (showSplash) {
     return (
       <div className="fixed inset-0 z-50 bg-black flex items-center justify-center overflow-hidden">
-        {/* সাউন্ডের জন্য muted অপশনটি বাদ দেওয়া হয়েছে */}
         <video 
           src={splashVideo} 
           autoPlay 
@@ -200,6 +200,11 @@ export default function App() {
   return (
     <div className="min-h-screen relative p-5 pb-20">
       
+      {/* গ্লোবাল ফন্ট ইমপোর্ট */}
+      <style>
+        {`@import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap');`}
+      </style>
+
       {/* Background Image Setup */}
       <div className="fixed inset-0 z-0">
         <div className="absolute inset-0 bg-white/85 backdrop-blur-[4px] z-10"></div>
@@ -212,7 +217,7 @@ export default function App() {
         <div className="flex flex-col items-center mb-8">
           <img src={hisabImage} alt="Hishab Logo" className="w-20 h-20 rounded-2xl object-cover mb-2 shadow-lg" />
           <h1 className="text-4xl font-black text-gray-800 tracking-tight">ডিজিটাল হিসাব</h1>
-          <p style={{ fontFamily: "'Brush Script MT', 'Dancing Script', cursive" }} className="text-blue-600 text-2xl font-bold mt-1 tracking-widest drop-shadow-sm">
+          <p style={{ fontFamily: "'Dancing Script', cursive" }} className="text-blue-600 text-xl font-bold mt-1 tracking-wider drop-shadow-md">
             Powered by Mahsin
           </p>
         </div>
@@ -227,7 +232,7 @@ export default function App() {
           <div className="relative bg-white rounded-3xl p-5 text-gray-800 shadow shadow-blue-100 flex flex-col items-center justify-center text-center border border-blue-50 overflow-hidden">
             <div className="absolute inset-0 opacity-[0.15] bg-cover bg-top" style={{ backgroundImage: `url(${mahsinImg})` }}></div>
             <div className="relative z-10">
-              <p className="text-[10px] uppercase font-bold tracking-widest text-blue-600 drop-shadow-md">মহসিন বাজার করেছে</p>
+              <p className="text-[10px] uppercase font-bold tracking-widest text-blue-600 drop-shadow-md">মহসিন করেছে</p>
               <p className="text-2xl font-black mt-1 text-gray-900 drop-shadow-md">৳{memberSpending['মহসিন'].toFixed(0)}</p>
             </div>
           </div>
@@ -235,7 +240,7 @@ export default function App() {
           <div className="relative bg-white rounded-3xl p-5 text-gray-800 shadow shadow-blue-100 flex flex-col items-center justify-center text-center border border-blue-50 overflow-hidden">
             <div className="absolute inset-0 opacity-[0.15] bg-cover bg-top" style={{ backgroundImage: `url(${jisanImg})` }}></div>
             <div className="relative z-10">
-              <p className="text-[10px] uppercase font-bold tracking-widest text-blue-600 drop-shadow-md">জিসান বাজার করেছে</p>
+              <p className="text-[10px] uppercase font-bold tracking-widest text-blue-600 drop-shadow-md">জিসান করেছে</p>
               <p className="text-2xl font-black mt-1 text-gray-900 drop-shadow-md">৳{memberSpending['জিসান'].toFixed(0)}</p>
             </div>
           </div>
