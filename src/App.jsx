@@ -227,7 +227,7 @@ export default function App() {
           <div className="relative bg-white rounded-3xl p-5 text-gray-800 shadow shadow-blue-100 flex flex-col items-center justify-center text-center border border-blue-50 overflow-hidden">
             <div className="absolute inset-0 opacity-[0.15] bg-cover bg-top" style={{ backgroundImage: `url(${mahsinImg})` }}></div>
             <div className="relative z-10">
-              <p className="text-[10px] uppercase font-bold tracking-widest text-blue-600 drop-shadow-md">মহসিন করেছে</p>
+              <p className="text-[10px] uppercase font-bold tracking-widest text-blue-600 drop-shadow-md">মহসিন বাজার করেছে</p>
               <p className="text-2xl font-black mt-1 text-gray-900 drop-shadow-md">৳{memberSpending['মহসিন'].toFixed(0)}</p>
             </div>
           </div>
@@ -235,7 +235,7 @@ export default function App() {
           <div className="relative bg-white rounded-3xl p-5 text-gray-800 shadow shadow-blue-100 flex flex-col items-center justify-center text-center border border-blue-50 overflow-hidden">
             <div className="absolute inset-0 opacity-[0.15] bg-cover bg-top" style={{ backgroundImage: `url(${jisanImg})` }}></div>
             <div className="relative z-10">
-              <p className="text-[10px] uppercase font-bold tracking-widest text-blue-600 drop-shadow-md">জিসান করেছে</p>
+              <p className="text-[10px] uppercase font-bold tracking-widest text-blue-600 drop-shadow-md">জিসান বাজার করেছে</p>
               <p className="text-2xl font-black mt-1 text-gray-900 drop-shadow-md">৳{memberSpending['জিসান'].toFixed(0)}</p>
             </div>
           </div>
