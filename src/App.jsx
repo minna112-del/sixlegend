@@ -19,7 +19,7 @@ import jisanImg from './JISAN.jpeg';
 import splashVideo from './splash_video.mp4'; // আপনার আপলোড করা ভিডিও
 
 // ================= CONFIG =================
-const APP_PIN = "7307"; 
+const APP_PIN = "7373"; 
 // (পিন সেভ রাখার অপশন মুছে ফেলা হয়েছে)
 
 // ================= MEMBERS =================
@@ -171,8 +171,7 @@ export default function App() {
       <div className="fixed inset-0 z-50 bg-black flex items-center justify-center overflow-hidden">
         <video 
           src={splashVideo} 
-          autoPlay 
-          muted 
+          autoPlay  
           playsInline 
           className="w-full h-full object-cover"
         />
