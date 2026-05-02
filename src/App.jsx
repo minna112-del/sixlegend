@@ -1,25 +1,25 @@
 import React, { useEffect, useState } from "react";
-import { initializeApp } from "firebase/app";
-import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "firebase/auth";
 import {
-  getFirestore,
   collection,
   addDoc,
   deleteDoc,
   doc,
   updateDoc,
-  onSnapshot
+  onSnapshot,
+  query,
+  orderBy,
+  where,
 } from "firebase/firestore";
+import { db } from "./firebase";
 
-// ================= FIREBASE SETUP =================
-const firebaseConfig = typeof __firebase_config !== "undefined" ? JSON.parse(__firebase_config) : {};
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-const appId = typeof __app_id !== "undefined" ? __app_id : "hishab-app-default";
+// ছবি ও ভিডিও ইমপোর্ট করা হলো
+import hisabImage from './hisab.jpeg';
+import mahsinImg from './MAHSIN.jpeg';
+import jisanImg from './JISAN.jpeg';
+import splashVideo from './splash_video.mp4'; 
 
 // ================= CONFIG =================
-const APP_PIN = "7307";
+const APP_PIN = "7307"; 
 
 // ================= MEMBERS =================
 const MEMBERS = [
@@ -40,29 +40,27 @@ const formatDateForInput = (ts) => {
 
 // ================= AVATAR COMPONENT =================
 const MemberAvatar = ({ name }) => {
-  const fallbackSrc = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random&color=fff&size=64`;
-  
+  let src = name === "মহসিন" ? mahsinImg : jisanImg;
   return (
     <img
-      src={fallbackSrc}
+      src={src}
       alt={name}
       className="w-16 h-16 rounded-full object-cover object-top border-4 border-blue-500 shadow-lg scale-110"
-      onError={(e) => { e.target.src = fallbackSrc; }}
+      onError={(e) => e.target.src = `https://via.placeholder.com/64?text=${name[0]}`}
     />
   );
 };
 
 // ================= APP =================
 export default function App() {
-  const [user, setUser] = useState(null);
-  const [isUnlocked, setIsUnlocked] = useState(false);
-  const [showSplash, setShowSplash] = useState(false);
+  const [isUnlocked, setIsUnlocked] = useState(false); 
+  const [showSplash, setShowSplash] = useState(false); 
   const [pinInput, setPinInput] = useState("");
   const [pinError, setPinError] = useState("");
 
   const [monthKey, setMonthKey] = useState(currentMonthKey());
   const [marketItems, setMarketItems] = useState([]);
-  const [shoppingList, setShoppingList] = useState([]);
+  const [shoppingList, setShoppingList] = useState([]); 
   const [loading, setLoading] = useState(true);
 
   // States
@@ -77,118 +75,68 @@ export default function App() {
   const [actionPinInput, setActionPinInput] = useState("");
   const [editModal, setEditModal] = useState({ isOpen: false, id: "", text: "", amount: "", buyer: "", date: "" });
 
-  // Authentication Effect
   useEffect(() => {
-    const initAuth = async () => {
-      try {
-        if (typeof __initial_auth_token !== "undefined" && __initial_auth_token) {
-          await signInWithCustomToken(auth, __initial_auth_token);
-        } else {
-          await signInAnonymously(auth);
-        }
-      } catch (error) {
-        console.error("Auth error:", error);
-      }
-    };
-    initAuth();
-    
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-    });
-    return () => unsubscribe();
-  }, []);
-
-  // Data Fetching Effect
-  useEffect(() => {
-    if (!user) return;
     setLoading(true);
-
     const [yy, mm] = monthKey.split("-").map(Number);
     const start = new Date(yy, mm - 1, 1).getTime();
     const end = new Date(yy, mm, 1).getTime();
 
-    const expensesRef = collection(db, "artifacts", appId, "public", "data", "expenses");
-    const unsubExpenses = onSnapshot(expensesRef, (snap) => {
-      const allExpenses = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      
-      const filtered = allExpenses.filter(e => e.timestamp >= start && e.timestamp < end);
-      filtered.sort((a, b) => b.timestamp - a.timestamp);
-      
-      setMarketItems(filtered);
+    const qExpenses = query(
+      collection(db, "expenses"), 
+      where("timestamp", ">=", start), 
+      where("timestamp", "<", end), 
+      orderBy("timestamp", "desc")
+    );
+    const unsubExpenses = onSnapshot(qExpenses, (snap) => {
+      setMarketItems(snap.docs.map(d => ({ id: d.id, ...d.data() })));
       setLoading(false);
-    }, (error) => {
-      console.error("Error fetching expenses:", error);
     });
 
-    const shoppingRef = collection(db, "artifacts", appId, "public", "data", "shopping_list");
-    const unsubShopping = onSnapshot(shoppingRef, (snap) => {
-      const allShopping = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      allShopping.sort((a, b) => a.timestamp - b.timestamp);
-      setShoppingList(allShopping);
-    }, (error) => {
-      console.error("Error fetching shopping list:", error);
-    });
+    const qShopping = query(collection(db, "shopping_list"), orderBy("timestamp", "asc"));
+    const unsubShopping = onSnapshot(qShopping, (snap) => setShoppingList(snap.docs.map(d => ({ id: d.id, ...d.data() }))));
 
-    return () => { 
-      unsubExpenses(); 
-      unsubShopping(); 
-    };
-  }, [user, monthKey]);
+    return () => { unsubExpenses(); unsubShopping(); };
+  }, [monthKey]);
 
+  // পিন আনলক ও স্প্ল্যাশ ভিডিও প্লেয়ার
   const unlock = () => {
     if (pinInput === APP_PIN) {
       setPinError("");
       setPinInput("");
-      setShowSplash(true);
-
+      setShowSplash(true); 
+      
+      // ভিডিওর সময়কাল ৩ সেকেন্ড (3000) করে দেওয়া হলো
       setTimeout(() => {
         setShowSplash(false);
-        setIsUnlocked(true);
-      }, 3000);
-    } else {
-      setPinError("ভুল পিন! আবার চেষ্টা করুন");
-    }
+        setIsUnlocked(true); 
+      }, 3000); 
+
+    } else { setPinError("ভুল পিন! আবার চেষ্টা করুন"); }
   };
 
   const handleAddExpense = async (e) => {
     e.preventDefault();
-    if (!newItemText || !newAmount || !user) return;
+    if (!newItemText || !newAmount) return;
     try {
-      await addDoc(collection(db, "artifacts", appId, "public", "data", "expenses"), { 
-        text: newItemText, 
-        amount: Number(newAmount), 
-        buyer: selectedBuyer, 
-        timestamp: new Date(selectedDate).getTime() 
-      });
-      setNewItemText(""); 
-      setNewAmount("");
-    } catch (error) {
+      await addDoc(collection(db, "expenses"), { text: newItemText, amount: Number(newAmount), buyer: selectedBuyer, timestamp: new Date(selectedDate).getTime() });
+      setNewItemText(""); setNewAmount("");
+    } catch (error) { 
       console.error(error);
-      setPinError("ডাটা সেভ করতে সমস্যা হয়েছে!");
+      alert("ডাটা সেভ করতে সমস্যা হয়েছে!"); 
     }
   };
 
   const handleAddShoppingItem = async (e) => {
     e.preventDefault();
-    if (!newShoppingItem || !user) return;
+    if (!newShoppingItem) return;
     try {
-      await addDoc(collection(db, "artifacts", appId, "public", "data", "shopping_list"), { 
-        text: newShoppingItem, 
-        timestamp: Date.now() 
-      });
+      await addDoc(collection(db, "shopping_list"), { text: newShoppingItem, timestamp: Date.now() });
       setNewShoppingItem("");
-    } catch (error) {
-      console.error(error);
-    }
+    } catch (error) { console.error(error); }
   };
 
   const deleteShoppingItem = async (id) => {
-    if (!user) return;
-    try {
-      await deleteDoc(doc(db, "artifacts", appId, "public", "data", "shopping_list", id));
-    } catch (error) {
-      console.error(error);
-    }
+    try { await deleteDoc(doc(db, "shopping_list", id)); } catch (error) { console.error(error); }
   };
 
   const verifyActionPin = async () => {
@@ -196,25 +144,16 @@ export default function App() {
       setActionModal(prev => ({ ...prev, error: "ভুল পিন!" }));
       return;
     }
-    
+
     const { type, item } = actionModal;
     if (type === 'delete') {
       try {
-        await deleteDoc(doc(db, "artifacts", appId, "public", "data", "expenses", item.id));
+        await deleteDoc(doc(db, "expenses", item.id));
         setActionModal({ isOpen: false, type: "", item: null, error: "" });
         setActionPinInput("");
-      } catch (error) {
-        setActionModal(prev => ({ ...prev, error: "ডিলেট করতে সমস্যা হয়েছে!" }));
-      }
+      } catch (error) { setActionModal(prev => ({ ...prev, error: "ডিলেট করতে সমস্যা হয়েছে!" })); }
     } else if (type === 'edit') {
-      setEditModal({ 
-        isOpen: true, 
-        id: item.id, 
-        text: item.text, 
-        amount: item.amount, 
-        buyer: item.buyer, 
-        date: formatDateForInput(item.timestamp) 
-      });
+      setEditModal({ isOpen: true, id: item.id, text: item.text, amount: item.amount, buyer: item.buyer, date: formatDateForInput(item.timestamp) });
       setActionModal({ isOpen: false, type: "", item: null, error: "" });
       setActionPinInput("");
     }
@@ -222,106 +161,80 @@ export default function App() {
 
   const handleUpdateExpense = async (e) => {
     e.preventDefault();
-    if (!user) return;
     try {
-      await updateDoc(doc(db, "artifacts", appId, "public", "data", "expenses", editModal.id), { 
-        text: editModal.text, 
-        amount: Number(editModal.amount), 
-        buyer: editModal.buyer, 
-        timestamp: new Date(editModal.date).getTime() 
-      });
+      await updateDoc(doc(db, "expenses", editModal.id), { text: editModal.text, amount: Number(editModal.amount), buyer: editModal.buyer, timestamp: new Date(editModal.date).getTime() });
       setEditModal({ isOpen: false, id: "", text: "", amount: "", buyer: "", date: "" });
-    } catch (error) {
-      console.error("Update failed", error);
-    }
+    } catch (error) { alert("আপডেট ব্যর্থ হয়েছে!"); }
   };
 
   // CALCULATIONS
   const totalMarketExpense = marketItems.reduce((sum, i) => sum + Number(i.amount || 0), 0);
   const memberSpending = {};
   memberNamesOnly.forEach(n => memberSpending[n] = 0);
-  marketItems.forEach(i => { 
-    if (memberSpending[i.buyer] !== undefined) {
-      memberSpending[i.buyer] += Number(i.amount || 0); 
-    }
-  });
+  marketItems.forEach(i => { if (memberSpending[i.buyer] !== undefined) memberSpending[i.buyer] += Number(i.amount || 0); });
   const perPersonMarket = totalMarketExpense / 2;
   const balances = {};
-  memberNamesOnly.forEach(name => { 
-    balances[name] = memberSpending[name] - perPersonMarket; 
-  });
+  memberNamesOnly.forEach(name => { balances[name] = memberSpending[name] - perPersonMarket; });
 
-  const bgPatternUrl = "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&q=80&w=1000";
-
+  // ================= স্প্ল্যাশ স্ক্রিন =================
   if (showSplash) {
     return (
-      <div className="fixed inset-0 z-50 bg-blue-900 flex items-center justify-center overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-tr from-blue-900 via-blue-600 to-indigo-900 animate-pulse"></div>
-        <div className="relative z-10 flex flex-col items-center animate-bounce">
-          <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-2xl mb-4">
-            <span className="text-4xl font-black text-blue-600">৳</span>
-          </div>
-          <h1 className="text-4xl font-black text-white tracking-widest">হিসাব</h1>
-        </div>
+      <div className="fixed inset-0 z-50 bg-black flex items-center justify-center overflow-hidden">
+        <video 
+          src={splashVideo} 
+          autoPlay 
+          playsInline 
+          className="w-full h-full object-cover"
+        />
       </div>
     );
   }
 
+  // ================= লক স্ক্রিন =================
   if (!isUnlocked) {
     return (
       <div className="min-h-screen bg-blue-950 flex items-center justify-center p-4 text-center">
         <div className="bg-white rounded-3xl w-full max-w-xs p-8 shadow-2xl">
           <div className="flex flex-col items-center mb-6">
-            <div className="w-20 h-20 bg-blue-100 rounded-2xl flex items-center justify-center mb-2">
-               <span className="text-4xl font-black text-blue-600">৳</span>
-            </div>
+            <img src={hisabImage} alt="Hishab Logo" className="w-20 h-20 rounded-2xl object-cover mb-2" />
             <h1 className="text-4xl font-black mb-2">হিসাব</h1>
             <p className="text-gray-600">মহসিন ও জিসান</p>
           </div>
-          <input 
-            type="password" 
-            maxLength={4} 
-            value={pinInput} 
-            onChange={(e) => setPinInput(e.target.value)} 
-            placeholder="••••" 
-            className="w-full text-3xl text-center py-5 border-2 border-gray-200 rounded-2xl outline-none tracking-widest font-mono focus:border-blue-500 transition-colors" 
-          />
+          <input type="password" maxLength={4} value={pinInput} onChange={(e) => setPinInput(e.target.value)} placeholder="••••" className="w-full text-3xl text-center py-5 border-2 rounded-2xl outline-none tracking-widest font-mono focus:border-blue-500 transition-colors" />
           {pinError && <p className="text-red-500 mt-4 font-bold">{pinError}</p>}
-          <button 
-            onClick={unlock} 
-            className="mt-6 w-full bg-blue-600 text-white font-bold py-4 rounded-2xl text-lg transition hover:bg-blue-700 shadow-lg"
-          >
-            প্রবেশ করুন
-          </button>
+          <button onClick={unlock} className="mt-6 w-full bg-blue-600 text-white font-bold py-4 rounded-2xl text-lg transition hover:bg-blue-700 shadow-lg">প্রবেশ করুন</button>
         </div>
       </div>
     );
   }
 
+  // ================= মূল অ্যাপ (আনলকড) =================
   return (
     <div className="min-h-screen relative p-5 pb-20">
+      
+      {/* গ্লোবাল ফন্ট ইমপোর্ট */}
       <style>
         {`@import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap');`}
       </style>
 
+      {/* Background Image Setup */}
       <div className="fixed inset-0 z-0">
-        <div className="absolute inset-0 bg-white/90 backdrop-blur-md z-10"></div>
-        <img src={bgPatternUrl} className="w-full h-full object-cover z-0 opacity-50" alt="background" />
+        <div className="absolute inset-0 bg-white/85 backdrop-blur-[4px] z-10"></div>
+        <img src={hisabImage} className="w-full h-full object-cover z-0" alt="background" />
       </div>
 
       <div className="max-w-md mx-auto space-y-6 relative z-20">
         
+        {/* Main Title with Calligraphy */}
         <div className="flex flex-col items-center mb-6 pt-4">
-          <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mb-2 shadow-lg">
-             <span className="text-3xl font-black text-white">৳</span>
-          </div>
+          <img src={hisabImage} alt="Hishab Logo" className="w-20 h-20 rounded-2xl object-cover mb-2 shadow-lg" />
           <h1 className="text-4xl font-black text-gray-800 tracking-tight">ডিজিটাল হিসাব</h1>
           <p style={{ fontFamily: "'Dancing Script', cursive" }} className="text-blue-600 text-xl font-bold mt-1 tracking-wider drop-shadow-md">
             Powered by Mahsin
           </p>
         </div>
 
-        {/* Month Selector */}
+        {/* মাস সিলেক্ট করার নতুন অপশন */}
         <div className="flex justify-center mb-6">
           <div className="bg-white/90 backdrop-blur-sm px-4 py-2 rounded-2xl shadow-sm border border-blue-100 flex items-center gap-3">
             <span className="text-xl">📅</span>
@@ -334,6 +247,7 @@ export default function App() {
           </div>
         </div>
         
+        {/* Summary Section */}
         <div className="grid grid-cols-2 gap-4">
           <div className="bg-blue-600 rounded-3xl p-5 text-white shadow-lg flex flex-col items-center justify-center text-center">
             <p className="text-[10px] uppercase font-bold tracking-widest opacity-80">মোট বাজার</p>
@@ -341,6 +255,7 @@ export default function App() {
           </div>
           
           <div className="relative bg-white rounded-3xl p-5 text-gray-800 shadow shadow-blue-100 flex flex-col items-center justify-center text-center border border-blue-50 overflow-hidden">
+            <div className="absolute inset-0 opacity-[0.15] bg-cover bg-top" style={{ backgroundImage: `url(${mahsinImg})` }}></div>
             <div className="relative z-10">
               <p className="text-[10px] uppercase font-bold tracking-widest text-blue-600 drop-shadow-md">মহসিন করেছে</p>
               <p className="text-2xl font-black mt-1 text-gray-900 drop-shadow-md">৳{memberSpending['মহসিন'].toFixed(0)}</p>
@@ -348,6 +263,7 @@ export default function App() {
           </div>
           
           <div className="relative bg-white rounded-3xl p-5 text-gray-800 shadow shadow-blue-100 flex flex-col items-center justify-center text-center border border-blue-50 overflow-hidden">
+            <div className="absolute inset-0 opacity-[0.15] bg-cover bg-top" style={{ backgroundImage: `url(${jisanImg})` }}></div>
             <div className="relative z-10">
               <p className="text-[10px] uppercase font-bold tracking-widest text-blue-600 drop-shadow-md">জিসান করেছে</p>
               <p className="text-2xl font-black mt-1 text-gray-900 drop-shadow-md">৳{memberSpending['জিসান'].toFixed(0)}</p>
@@ -356,21 +272,15 @@ export default function App() {
 
           <div className="bg-yellow-400 rounded-3xl p-5 text-yellow-900 shadow-lg flex flex-col items-center justify-center text-center">
             <p className="text-[10px] uppercase font-bold tracking-widest opacity-80">বাজার করতে হবে</p>
-            <p className="text-2xl font-black mt-1">{shoppingList.length}টি</p>
+            <p className="text-2xl font-black mt-1">{shoppingList.length}টি আইটেম</p>
           </div>
         </div>
 
+        {/* Shopping List Section */}
         <div className="bg-yellow-50/90 backdrop-blur-sm rounded-3xl p-6 shadow-md border-t-8 border-yellow-400">
           <h3 className="font-bold text-xl mb-5 text-gray-800 flex items-center gap-2">🛒 কি কি আনতে হবে?</h3>
           <form onSubmit={handleAddShoppingItem} className="flex gap-2 mb-6">
-            <input 
-              type="text" 
-              placeholder="জিনিসের নাম..." 
-              value={newShoppingItem} 
-              onChange={(e) => setNewShoppingItem(e.target.value)} 
-              className="flex-1 p-3 border-2 border-yellow-200 rounded-2xl outline-none focus:border-yellow-400 bg-white" 
-              required 
-            />
+            <input type="text" placeholder="জিনিসের নাম..." value={newShoppingItem} onChange={(e) => setNewShoppingItem(e.target.value)} className="flex-1 p-3 border-2 border-yellow-200 rounded-2xl outline-none focus:border-yellow-400 bg-white" required />
             <button type="submit" className="bg-yellow-400 hover:bg-yellow-500 text-yellow-900 px-6 rounded-2xl font-black text-xl shadow-sm transition-colors">➕</button>
           </form>
           <div className="space-y-2">
@@ -387,6 +297,7 @@ export default function App() {
           </div>
         </div>
 
+        {/* Individual Balances */}
         <div className="space-y-4">
           {memberNamesOnly.map((name) => (
             <div key={name} className="bg-white/95 backdrop-blur-md rounded-3xl p-6 shadow-md flex items-center gap-6 border border-gray-100">
@@ -401,57 +312,29 @@ export default function App() {
           ))}
         </div>
 
+        {/* Add Expense Form */}
         <div className="bg-white/95 backdrop-blur-md rounded-3xl p-6 shadow-lg border border-gray-100">
           <h3 className="font-bold text-lg mb-4 text-gray-800">নতুন বাজার খরচ যোগ করুন</h3>
           <form onSubmit={handleAddExpense} className="space-y-4">
-            <input 
-              type="text" 
-              placeholder="পণ্যের নাম..." 
-              value={newItemText} 
-              onChange={(e) => setNewItemText(e.target.value)} 
-              className="w-full p-4 border-2 border-gray-200 rounded-2xl outline-none focus:border-blue-500 transition-colors" 
-              required 
-            />
+            <input type="text" placeholder="পণ্যের নাম..." value={newItemText} onChange={(e) => setNewItemText(e.target.value)} className="w-full p-4 border-2 border-gray-200 rounded-2xl outline-none focus:border-blue-500 transition-colors" required />
             <div className="flex gap-3">
-              <input 
-                type="number" 
-                step="0.01" 
-                placeholder="টাকা" 
-                value={newAmount} 
-                onChange={(e) => setNewAmount(e.target.value)} 
-                className="flex-1 p-4 border-2 border-gray-200 rounded-2xl outline-none focus:border-blue-500 transition-colors" 
-                required 
-              />
-              <select 
-                value={selectedBuyer} 
-                onChange={(e) => setSelectedBuyer(e.target.value)} 
-                className="p-4 border-2 border-gray-200 rounded-2xl bg-white outline-none focus:border-blue-500 font-bold transition-colors cursor-pointer"
-              >
+              <input type="number" step="0.01" placeholder="টাকা" value={newAmount} onChange={(e) => setNewAmount(e.target.value)} className="flex-1 p-4 border-2 border-gray-200 rounded-2xl outline-none focus:border-blue-500 transition-colors" required />
+              <select value={selectedBuyer} onChange={(e) => setSelectedBuyer(e.target.value)} className="p-4 border-2 border-gray-200 rounded-2xl bg-white outline-none focus:border-blue-500 font-bold transition-colors cursor-pointer">
                 {memberNamesOnly.map(n => <option key={n} value={n}>{n}</option>)}
               </select>
             </div>
-            <input 
-              type="date" 
-              value={selectedDate} 
-              onChange={(e) => setSelectedDate(e.target.value)} 
-              className="w-full p-4 border-2 border-gray-200 rounded-2xl outline-none focus:border-blue-500 text-gray-600 transition-colors" 
-            />
-            <button 
-              type="submit" 
-              className="w-full bg-blue-600 text-white py-4 rounded-2xl font-black text-xl shadow-lg hover:bg-blue-700 transition-colors"
-            >
-              সেভ করুন
-            </button>
+            <input type="date" value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)} className="w-full p-4 border-2 border-gray-200 rounded-2xl outline-none focus:border-blue-500 text-gray-600 transition-colors" />
+            <button type="submit" className="w-full bg-blue-600 text-white py-4 rounded-2xl font-black text-xl shadow-lg hover:bg-blue-700 transition-colors">সেভ করুন</button>
           </form>
         </div>
 
+        {/* Expense History List */}
         <div className="bg-white/95 backdrop-blur-md rounded-3xl p-6 shadow border border-gray-100 mb-8">
           <h3 className="font-bold text-lg mb-4 text-gray-800">খরচের তালিকা</h3>
           <div className="space-y-3">
             {marketItems.length === 0 && !loading && (
               <p className="text-gray-500 text-center py-4 italic">এই মাসে কোনো খরচ নেই</p>
             )}
-            
             {marketItems.map((item) => (
               <div key={item.id} className="flex justify-between items-center p-4 bg-gray-50 hover:bg-gray-100 transition-colors rounded-2xl border border-gray-100 shadow-sm">
                 <div className="flex-1">
@@ -461,18 +344,8 @@ export default function App() {
                 <div className="text-right">
                   <p className="font-black text-blue-600 text-xl">৳{item.amount.toFixed(2)}</p>
                   <div className="flex gap-2 mt-2 justify-end">
-                    <button 
-                      onClick={() => setActionModal({ isOpen: true, type: 'edit', item, error: "" })} 
-                      className="bg-blue-100 hover:bg-blue-200 text-blue-800 p-2 rounded-lg transition-colors text-sm"
-                    >
-                      ✏️
-                    </button>
-                    <button 
-                      onClick={() => setActionModal({ isOpen: true, type: 'delete', item, error: "" })} 
-                      className="bg-red-100 hover:bg-red-200 text-red-800 p-2 rounded-lg transition-colors text-sm"
-                    >
-                      🗑️
-                    </button>
+                    <button onClick={() => setActionModal({ isOpen: true, type: 'edit', item, error: "" })} className="bg-blue-100 hover:bg-blue-200 text-blue-800 p-2 rounded-lg transition-colors text-sm">✏️</button>
+                    <button onClick={() => setActionModal({ isOpen: true, type: 'delete', item, error: "" })} className="bg-red-100 hover:bg-red-200 text-red-800 p-2 rounded-lg transition-colors text-sm">🗑️</button>
                   </div>
                 </div>
               </div>
@@ -481,89 +354,38 @@ export default function App() {
         </div>
       </div>
 
+      {/* Security Modals (Delete) */}
       {actionModal.isOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-3xl p-6 w-full max-w-xs text-center shadow-2xl animate-in zoom-in duration-200">
             <h3 className="font-bold text-xl mb-4">সিকিউরিটি পিন দিন</h3>
-            <input 
-              type="password" 
-              maxLength={4} 
-              value={actionPinInput} 
-              onChange={(e) => setActionPinInput(e.target.value)} 
-              placeholder="••••" 
-              className="w-full text-3xl text-center py-4 border-2 border-gray-200 rounded-2xl outline-none focus:border-blue-600 tracking-widest mb-2 font-mono" 
-            />
+            <input type="password" maxLength={4} value={actionPinInput} onChange={(e) => setActionPinInput(e.target.value)} placeholder="••••" className="w-full text-3xl text-center py-4 border-2 border-gray-200 rounded-2xl outline-none focus:border-blue-600 tracking-widest mb-2 font-mono" />
             {actionModal.error && <p className="text-red-500 font-bold mb-4">{actionModal.error}</p>}
             <div className="flex gap-3 mt-4">
-              <button 
-                onClick={() => {
-                  setActionModal({ isOpen: false, type: "", item: null, error: "" });
-                  setActionPinInput("");
-                }} 
-                className="flex-1 bg-gray-100 hover:bg-gray-200 py-3 rounded-2xl font-bold transition-colors text-gray-700"
-              >
-                বাতিল
-              </button>
-              <button 
-                onClick={verifyActionPin} 
-                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-2xl font-bold transition-colors"
-              >
-                নিশ্চিত
-              </button>
+              <button onClick={() => { setActionModal({ isOpen: false, type: "", item: null, error: "" }); setActionPinInput(""); }} className="flex-1 bg-gray-100 hover:bg-gray-200 py-3 rounded-2xl font-bold transition-colors text-gray-700">বাতিল</button>
+              <button onClick={verifyActionPin} className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-2xl font-bold transition-colors">নিশ্চিত</button>
             </div>
           </div>
         </div>
       )}
 
+      {/* Edit Modal */}
       {editModal.isOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl animate-in slide-in-from-bottom-4 duration-200">
             <h3 className="font-bold text-xl mb-4 text-center">সংশোধন করুন</h3>
             <form onSubmit={handleUpdateExpense} className="space-y-4">
-              <input 
-                type="text" 
-                value={editModal.text} 
-                onChange={(e) => setEditModal({ ...editModal, text: e.target.value })} 
-                className="w-full p-4 border-2 border-gray-200 rounded-2xl outline-none focus:border-blue-500" 
-                required 
-              />
+              <input type="text" value={editModal.text} onChange={(e) => setEditModal({ ...editModal, text: e.target.value })} className="w-full p-4 border-2 border-gray-200 rounded-2xl outline-none focus:border-blue-500" required />
               <div className="flex gap-3">
-                <input 
-                  type="number" 
-                  step="0.01" 
-                  value={editModal.amount} 
-                  onChange={(e) => setEditModal({ ...editModal, amount: e.target.value })} 
-                  className="flex-1 p-4 border-2 border-gray-200 rounded-2xl outline-none focus:border-blue-500" 
-                  required 
-                />
-                <select 
-                  value={editModal.buyer} 
-                  onChange={(e) => setEditModal({ ...editModal, buyer: e.target.value })} 
-                  className="p-4 border-2 border-gray-200 rounded-2xl font-bold outline-none focus:border-blue-500 bg-white"
-                >
+                <input type="number" step="0.01" value={editModal.amount} onChange={(e) => setEditModal({ ...editModal, amount: e.target.value })} className="flex-1 p-4 border-2 border-gray-200 rounded-2xl outline-none focus:border-blue-500" required />
+                <select value={editModal.buyer} onChange={(e) => setEditModal({ ...editModal, buyer: e.target.value })} className="p-4 border-2 border-gray-200 rounded-2xl font-bold outline-none focus:border-blue-500 bg-white">
                   {memberNamesOnly.map(n => <option key={n} value={n}>{n}</option>)}
                 </select>
               </div>
-              <input 
-                type="date" 
-                value={editModal.date} 
-                onChange={(e) => setEditModal({ ...editModal, date: e.target.value })} 
-                className="w-full p-4 border-2 border-gray-200 rounded-2xl outline-none focus:border-blue-500 text-gray-700" 
-              />
+              <input type="date" value={editModal.date} onChange={(e) => setEditModal({ ...editModal, date: e.target.value })} className="w-full p-4 border-2 border-gray-200 rounded-2xl outline-none focus:border-blue-500 text-gray-700" />
               <div className="flex gap-3 pt-2">
-                <button 
-                  type="button" 
-                  onClick={() => setEditModal({ isOpen: false, id: "", text: "", amount: "", buyer: "", date: "" })} 
-                  className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-800 py-4 rounded-2xl font-bold transition-colors"
-                >
-                  বাতিল
-                </button>
-                <button 
-                  type="submit" 
-                  className="flex-1 bg-green-600 hover:bg-green-700 text-white py-4 rounded-2xl font-black transition-colors"
-                >
-                  আপডেট
-                </button>
+                <button type="button" onClick={() => setEditModal({ isOpen: false, id: "", text: "", amount: "", buyer: "", date: "" })} className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-800 py-4 rounded-2xl font-bold transition-colors">বাতিল</button>
+                <button type="submit" className="flex-1 bg-green-600 hover:bg-green-700 text-white py-4 rounded-2xl font-black transition-colors">আপডেট</button>
               </div>
             </form>
           </div>
